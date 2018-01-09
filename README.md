@@ -1,4 +1,4 @@
-# Dotnet Examples
+# Dotnet Examples [![Build Status](https://travis-ci.org/Geotab/sdk-dotnet-samples.svg?branch=master)](https://travis-ci.org/Geotab/sdk-dotnet-samples)
 
 The following examples show common usages of the SDK using dotnet. We recommend that you study the examples to learn everything necessary to build your own custom applications:
 
