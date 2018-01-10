@@ -8,7 +8,7 @@ namespace Geotab.SDK.ImportGroupsR
     /// Breadth First Search Iterator, responsibility of the caller to ensure that
     /// before every iteration or the entire for each loop, child <see cref="Group"/> references in <see cref="Group.Children"/> have their children populated
     /// </summary>
-    class GroupBreadthFirstIterator : IEnumerable<Group>
+    public class GroupBreadthFirstIterator : IEnumerable<Group>
     {
         readonly Group root;
 

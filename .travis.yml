@@ -1,7 +1,9 @@
 language: csharp
 solution: SdkExamples.sln
 dotnet: 2.1.3
+mono: none
 install:
 - dotnet restore
 script:
 - dotnet build
+- dotnet test .\ImportGroupsR.Test\

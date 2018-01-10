@@ -11,7 +11,7 @@ namespace Geotab.SDK.ImportGroupsR
     /// <summary>
     /// Provides application specific parsing functionality
     /// </summary>
-    class ImportGroupParser
+    public class ImportGroupParser
     {
         const string CompanyGroupSReference = "Company Group";  // doesn't have to be actual sReference from DB of the group with KnownId.GroupCompanyId
         readonly SortedSet<int> allowedColors;

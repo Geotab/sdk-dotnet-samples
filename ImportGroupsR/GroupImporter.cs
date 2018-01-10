@@ -11,7 +11,7 @@ namespace Geotab.SDK.ImportGroupsR
     /// <summary>
     /// Group Importer
     /// </summary>
-    class GroupImporter
+    public class GroupImporter
     {
         const string AllIn = "All In";
         const string Dashboard = "Dashboard";
@@ -26,6 +26,7 @@ namespace Geotab.SDK.ImportGroupsR
         const string OnlyIn = "Only In";
         const string ReportView = "Report view";
         const string ReportViewScopeGroups = "Who can see this report:";
+
         readonly API api;
         readonly bool deleteEmptyGroups;
         readonly Group firstLineParentGroupFromDB;
