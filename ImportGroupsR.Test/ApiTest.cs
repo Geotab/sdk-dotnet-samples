@@ -13,10 +13,10 @@ namespace ImportGroupsR.Test
         /// This is a saftey precausion. These tests automatically remove all devices, rules, groups, users, zones, custom reports and trailer from the target database. Do not run against a production database. Register a new database @ https://my112.geotab.com/registration.html with the "_test" postfix to run the tests against.
         /// </summary>
         const string ExpectedDatabasePostFix = "_test";
-        const string envUserName = "api.username";
-        const string envPassword = "api.password";
-        const string envDatabase = "api.database";
-        const string envServer = "api.server";
+        const string envUserName = "api_username";
+        const string envPassword = "api_password";
+        const string envDatabase = "api_database";
+        const string envServer = "api_server";
 
         static string sessionId;
 
