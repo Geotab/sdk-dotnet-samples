@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <OutputType>exe</OutputType>
-    <OutDir>bin\$(Configuration)</OutDir>
+    <OutDir>bin\$(Configuration)\$(TargetFramework)</OutDir>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <LangVersion>latest</LangVersion>
