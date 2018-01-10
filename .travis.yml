@@ -6,4 +6,4 @@ install:
 - dotnet restore
 script:
 - dotnet build
-- dotnet test .\ImportGroupsR.Test\
+- dotnet test ./ImportGroupsR.Test/ImportGroupsR.Test.csproj
