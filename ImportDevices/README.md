@@ -3,13 +3,21 @@
 This is a console example of importing devices from a .csv file.
 
 Steps:
+
 1. Process command line arguments: Server, Database, Username, Password, Options and Load .csv file.
-2. Create Geotab API object and Authenticate.
-3. Import devices into database.
+1. Create Geotab API object and Authenticate.
+1. Import devices into database.
 
 > the .csv file included in this project is a sample, you may need to change entries (such as group names) for the example to work.
 
-### CSV layout
+## Prerequisites
+
+The sample application requires:
+
+- [.Net core 2.0 SDK](https://dot.net/core) or higher
+
+## CSV layout
+
 description | serial number | pipe delimited group names
 
 ```csv
@@ -21,14 +29,9 @@ Vehicle 1,GT-810-000-0001,Company Group
 Vehicle 2,GT-820-000-0002,Company Group
 ```
 
-## Prerequisites
-The sample application requires:
-
-- [.Net core 2.0 SDK](https://dot.net/core) or higher
-
 ## Getting started
 
-```
+```shell
 > git clone https://github.com/Geotab/sdk-dotnet-samples.git sdk-dotnet-samples
 > cd sdk-dotnet-samples
 > cd ImportDevices
@@ -36,6 +39,7 @@ The sample application requires:
 ```
 
 ### Parameters
+
 `dotnet run <server> <database> <login> <password> <inputfile>`
 Name | Description | Required
 --- | --- | ---

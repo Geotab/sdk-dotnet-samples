@@ -1,4 +1,5 @@
-# Import Groups by Reference 
+# Import Groups by Reference
+
 ## Reference-based Group Importing
 
 - [Introduction](#introduction)
@@ -35,7 +36,7 @@ The main purpose of the ImportGroupR tool is to synchronize the group structure 
 The operation of the ImportGroupR tool can be logically separated into two stages:
 
 1. Parsing of the **importGroups.csv** file
-2. Import of the parsed groups into the MyGeotab database
+1. Import of the parsed groups into the MyGeotab database
 
 ## ImportGroupR Command Line
 
@@ -49,17 +50,17 @@ For comparison, the command line of the similar SDK ImportGroup is:
 
 ### Command Line Arguments
 
-| **-f**  **<Log File Path>** — Optional argument. Specifies the full path of the output log file. If omitted, the log output will appear in the console window. |
+| `-f` (Log File Path) — Optional argument. Specifies the full path of the output log file. If omitted, the log output will appear in the console window. |
 | --- |
-| **-v** — Optional argument for verbose logging. |
+| `-v` — Optional argument for verbose logging. |
 | **MyGeotab Server Name, Database Name, User Name, Password, Input File Path** — These arguments are specific to the individual user, e.g. localhost as Server Name, company123 as Database Name. |
 
-For the remainder of this document, the file name at the end of the <Input File Path> is assumed to be **importGroups.csv**.
+For the remainder of this document, the file name at the end of the `<Input File Path>` is assumed to be **importGroups.csv**.
 
-| **-r**  **<Root Group Reference>** — Optional argument. <Root Group Reference> is the ImportGroupR **Root Group** Reference value for the root node of the group tree that the tool will manage. If this parameter is omitted, the Company Group will be used instead.You may opt to use the root node name instead of the Reference value as described below.The ImportGroupR tool shall only manage groups under the ImportGroupR **Root Group** node. The groups outside this tree (e.g. Device Groups, Emailed Reports, etc.) and their child groups will not be affected. |
+| `-r` (Root Group Reference) — Optional argument. Root Group Reference is the ImportGroupR **Root Group** Reference value for the root node of the group tree that the tool will manage. If this parameter is omitted, the Company Group will be used instead.You may opt to use the root node name instead of the Reference value as described below.The ImportGroupR tool shall only manage groups under the ImportGroupR **Root Group** node. The groups outside this tree (e.g. Device Groups, Emailed Reports, etc.) and their child groups will not be affected. |
 | --- |
-| **-d** — Optional argument. If provided, the groups that are in the MyGeotab database under the ImportGroupR **Root Group** , but not in the **importGroups.csv** file, shall be deleted if they contain no assets (i.e., child groups, devices, zones, users, etc.).If the parameter is omitted, such groups shall be logged in the log file as existing in the database but missing from the **importGroups.csv** file. |
-| **-m** — Optional argument.Implementation forthcoming.If provided concurrently with the **-d** argument, the tool will follow more severe rules for deletion. The rules are as follows:The groups found in the MyGeotab database but not in the **importGroups.csv** file will be deleted if empty. If not empty, the group&#39;s assets shall be moved to its parent and then the group will be deleted. |
+| `-d` — Optional argument. If provided, the groups that are in the MyGeotab database under the ImportGroupR **Root Group** , but not in the **importGroups.csv** file, shall be deleted if they contain no assets (i.e., child groups, devices, zones, users, etc.).If the parameter is omitted, such groups shall be logged in the log file as existing in the database but missing from the **importGroups.csv** file. |
+| `-m` — Optional argument.Implementation forthcoming.If provided concurrently with the **-d** argument, the tool will follow more severe rules for deletion. The rules are as follows:The groups found in the MyGeotab database but not in the **importGroups.csv** file will be deleted if empty. If not empty, the group's assets shall be moved to its parent and then the group will be deleted. |
 
 Example of command line: `dotnet run my.geotab.com geotabdemo importGroups.csv youruser@yourdomain.com yourpassword -f importGroups.log -v -r "New Region Structure"`
 
@@ -109,7 +110,7 @@ The fields in the input file will have the following characteristics:
 
 The ImportGroupR tool will assume that the parent group in the first line of the **importGroups.csv** file exists in the MyGeotab database and that it is either the ImportGroupR **Root Group** or its child.
 
-If the Company Group is intended to serve as the Root Group, the Parent Reference field should have a value of &#39;Company Group&#39; with no quotes. The Parent Name field value will be ignored in this case.
+If the Company Group is intended to serve as the Root Group, the Parent Reference field should have a value of 'Company Group' with no quotes. The Parent Name field value will be ignored in this case.
 
 > The import will fail if the root (first line) of **importGroups.csv** is not in the MyGeotab database.
 
@@ -195,12 +196,11 @@ If a Child Reference is present in the MyGeotab database, but not in the **impor
 #### -d Is Provided
 
 > In the MyGeotab database, if an object is associated with a group (Group 1) it cannot be also associated with any other group (Group 2) that is an ancestor or a descendent of Group 1.
-
-> In the UI of MyGeotab, a group cannot be deleted if it contains objects of the types described below. An error message will be displayed if a deletion is attempted. However, if a group has child group(s) but doesn&#39;t contain these objects, such parent groups can be deleted in the UI and the child group(s) will automatically become children of the deleted group&#39;s parent group.
+> In the UI of MyGeotab, a group cannot be deleted if it contains objects of the types described below. An error message will be displayed if a deletion is attempted. However, if a group has child group(s) but doesn't contain these objects, such parent groups can be deleted in the UI and the child group(s) will automatically become children of the deleted group's parent group.
 
 Since **importGroups.csv** represents the entire CompanyGroup tree of a MyGeotab database, this tool cannot encounter the case when the input will indicate the deletion of a group without also indicating that its child group(s) shall also be deleted.
 
-#####  and -m is not provided
+##### and -m is not provided
 
 If a Child Reference is present in the MyGeotab database, but not in **importGroups.csv** , the conditional below follows:
 
@@ -234,7 +234,7 @@ Log Example:
 Log Example:
 `Associated Custom Reports: Email Report <Report Name 1> with the group above in <Recipient List:> as <All In>; Email Report <Report Name 2> with the group above in <Recipient List:> as <Only In>.`
 
-#####  and -m is provided
+##### and -m is provided
 
 A non-empty group that is candidate for deletion (that is, it is not in the **importGroups.csv** file) can be associated with the objects of the types described below. The deletion behaviour will depend on those types.
 

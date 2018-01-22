@@ -1,15 +1,22 @@
 # Import Groups
 
 This is a console example of importing groups from a .csv file.
- 
+
 Steps:
+
 1. Process command line arguments: Server, Database, Username, Password, Input File and load .csv file.
-2. Create Geotab API object and Authenticate.
-3. Import groups into database.
+1. Create Geotab API object and Authenticate.
+1. Import groups into database.
 
 > the .csv file included in this project is a sample, you may need to change entries (such as group names) for the example to work.
 
-### CSV layout
+## Prerequisites
+
+The sample application requires:
+
+- [.Net core 2.0 SDK](https://dot.net/core) or higher
+
+## CSV layout
 
 Parent Group Name | New Group Name
 
@@ -19,21 +26,16 @@ Parent Group Name | New Group Name
 # Both <parent group name>,<new group name> must be unique 
 # -------------------------------------------------------------------------
 # lines beginning with '#' are comments and ignored
-# 
+#
 # create 2 groups under 'Organization'
 # -------------------------------------------------------------------------
 Organization,DriverGroup
 Organization,VehicleGroups
 ```
 
-## Prerequisites
-The sample application requires:
-
-- [.Net core 2.0 SDK](https://dot.net/core) or higher
-
 ## Getting started
 
-```
+```shell
 > git clone https://github.com/Geotab/sdk-dotnet-samples.git sdk-dotnet-samples
 > cd sdk-dotnet-samples
 > cd ImportGroups
@@ -41,6 +43,7 @@ The sample application requires:
 ```
 
 ### Parameters
+
 `dotnet run <server> <database> <login> <password> <inputfile>`
 Name | Description | Required
 --- | --- | ---
