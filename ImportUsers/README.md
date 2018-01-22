@@ -29,7 +29,7 @@ BasicUser@company.com,5bJknaJPKJSKP62Z,Entire Organization,Administrator,Basic,U
 ## Prerequisites
 The sample application requires:
 
-- [dotnet core 2.0 SDK](https://dot.net/core) or higher
+- [.Net core 2.0 SDK](https://dot.net/core) or higher
 
 ## Getting started
 

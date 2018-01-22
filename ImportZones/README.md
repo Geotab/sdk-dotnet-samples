@@ -24,7 +24,7 @@ Customer 1,40.68775,-73.98997,200,Company Group
 ## Prerequisites
 The sample application requires:
 
-- [dotnet core 2.0 SDK](https://dot.net/core) or higher
+- [.Net core 2.0 SDK](https://dot.net/core) or higher
 
 ## Getting started
 
