@@ -19,8 +19,8 @@ The Geotab Data Feed application connects to the MyGeotab cloud hosting services
 ## Getting started
 
 ```
-> git clone ... mg-sdk-dotnet-samples
-> cd mg-sdk-dotnet-samples
+> git clone https://github.com/Geotab/sdk-dotnet-samples.git sdk-dotnet-samples
+> cd sdk-dotnet-samples
 > cd DataFeed
 > dotnet run
 ```

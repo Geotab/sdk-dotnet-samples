@@ -29,8 +29,8 @@ The sample application requires:
 ## Getting started
 
 ```
-> git clone ... mg-sdk-dotnet-samples
-> cd mg-sdk-dotnet-samples
+> git clone https://github.com/Geotab/sdk-dotnet-samples.git sdk-dotnet-samples
+> cd sdk-dotnet-samples
 > cd ImportDevices
 > dotnet run "my.geotab.com" "database" "user@email.com" "password" "importDevices.csv"
 ```
