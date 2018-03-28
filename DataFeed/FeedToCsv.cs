@@ -159,11 +159,12 @@ namespace Geotab.SDK.DataFeed
                 {
                     if (i > 0)
                     {
-                        sb.Append(',');
+                        sb.Append('~');
                     }
-                    sb.Append(keys[i]);
+                    sb.Append(keys[i].SerialNumber);
                 }
             }
+            sb.Append(',');
         }
 
         static void AppendName(StringBuilder sb, NameEntity entity)
