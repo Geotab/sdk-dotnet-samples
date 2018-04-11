@@ -47,12 +47,10 @@ namespace Geotab.SDK.GetFuelTaxDetails
 
                 // Set the beginning of the time interval. It will be extended to the nearest hour. For example, 4:20:00 will become 4:00:00.
 
-                DateTime fromDate = new DateTime(2017, 6, 1, 4, 0, 0, DateTimeKind.Utc);
+                DateTime fromDate = new DateTime(2018, 1, 1, 5, 0, 0, DateTimeKind.Utc);
 
                 // Set the end of the time interval. It will be extended to the nearest hour. For example, 3:45:00 will become 4:00:00.
-                DateTime toDate = new DateTime(2017, 7, 1, 4, 0, 0, DateTimeKind.Utc);
-
-                (fromDate, toDate) = ExtendInterval(fromDate, toDate);
+                DateTime toDate = new DateTime(2018, 2, 1, 5, 0, 0, DateTimeKind.Utc);
 
                 // Create the Geotab API object.
                 // It is important to create this object with the base "Federation" server (my.geotab.com) NOT the specific server (e.g. my3.geotab.com).
@@ -62,12 +60,12 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 const string server = "my.geotab.com";
                 API api = new API(username, password, null, database, server);
 
-                // Get all devices.
+                // The example code will retrieve fuel tax details for one device at a time. For smaller fleets, it is feasible to retrieve the details for all devices by removing the device search from the search object below.
                 Console.WriteLine("Retrieving devices...");
                 IList<Device> devices = api.Call<IList<Device>>("Get", typeof(Device));
 
-                // For each device, get the fuel tax details that span the time interval.
-                Console.WriteLine("Processing fuel tax details...");
+                // Get the fuel tax details restricted to the time interval, grouped by device, and sorted by enter time.
+                Console.WriteLine("Retrieving fuel tax details...");
                 List<FuelTaxDetail> details = new List<FuelTaxDetail>();
                 var fuelUsageByDevice = new Dictionary<Device, Dictionary<string, Dictionary<FuelType, FuelUsage>>>();
                 foreach (var device in devices)
@@ -76,19 +74,16 @@ namespace Geotab.SDK.GetFuelTaxDetails
                     {
                         DeviceSearch = new DeviceSearch(device.Id),
                         FromDate = fromDate,
-                        ToDate = toDate
+                        ToDate = toDate,
+                        IncludeHourlyData = false,
+                        IncludeBoundaries = false
                     };
                     List<FuelTaxDetail> deviceDetails = api.Call<IList<FuelTaxDetail>>("Get", typeof(FuelTaxDetail), new { search = fuelTaxDetailSearch }).ToList();
-                    deviceDetails.Sort((detail1, detail2) => DateTime.Compare(detail1.ExitTime, detail2.ExitTime));
                     if (deviceDetails.Count > 0)
                     {
                         // Group successive details depending on the options.
                         List<List<FuelTaxDetail>> groups = Group(deviceDetails, options);
                         List<FuelTaxDetail> mergedDetails = Merge(groups);
-
-                        // Remove any part of the leftmost and rightmost details outside of the time interval.
-                        TrimLeft(mergedDetails[0], fromDate);
-                        TrimRight(mergedDetails[mergedDetails.Count - 1], toDate);
                         details.AddRange(deviceDetails);
                         if (options.FuelUsage)
                         {
@@ -121,25 +116,6 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 Console.Write("Press any key to exit...");
                 Console.ReadKey(true);
             }
-        }
-
-        /// <summary>
-        /// Extends a time interval to the nearest integer hours.
-        /// </summary>
-        /// <param name="fromDate">The begin time.</param>
-        /// <param name="toDate">The end time.</param>
-        /// <returns>The extended time interval.</returns>
-        static (DateTime, DateTime) ExtendInterval(DateTime fromDate, DateTime toDate)
-        {
-            var fromHours = fromDate.Ticks / HourTicks;
-            var extendedFromDate = new DateTime(fromHours * HourTicks, DateTimeKind.Utc);
-            var toHours = toDate.Ticks / HourTicks;
-            if (toDate.Ticks % HourTicks > 0)
-            {
-                toHours++;
-            }
-            var extendedToDate = new DateTime(toHours * HourTicks, DateTimeKind.Utc);
-            return (extendedFromDate, extendedToDate);
         }
 
         /// <summary>
@@ -226,61 +202,6 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 groupedDetails.Add(detail);
             }
             return groupedDetails;
-        }
-
-        /// <summary>
-        /// Clips a <see cref="FuelTaxDetail"/> at the nearest hour at or before a given time.
-        /// </summary>
-        /// <param name="detail">The detail.</param>
-        /// <param name="dateTime">The time.</param>
-        static void TrimLeft(FuelTaxDetail detail, DateTime dateTime)
-        {
-            var hour = dateTime.Ticks / HourTicks;
-            var enterHour = detail.EnterTime.Ticks / HourTicks;
-            if (hour > enterHour)
-            {
-                var hourIndex = (int)(hour - enterHour - 1);
-                detail.EnterTime = new DateTime(hour * HourTicks, DateTimeKind.Utc);
-                detail.EnterOdometer = detail.HourlyOdometer[hourIndex];
-                detail.EnterGpsOdometer = detail.HourlyGpsOdometer[hourIndex];
-                detail.EnterLatitude = detail.HourlyLatitude[hourIndex];
-                detail.EnterLongitude = detail.HourlyLongitude[hourIndex];
-                var removeCount = hourIndex + 1;
-                detail.HourlyOdometer.RemoveRange(0, removeCount);
-                detail.HourlyGpsOdometer.RemoveRange(0, removeCount);
-                detail.HourlyLatitude.RemoveRange(0, removeCount);
-                detail.HourlyLongitude.RemoveRange(0, removeCount);
-            }
-        }
-
-        /// <summary>
-        /// Clips a <see cref="FuelTaxDetail"/> at the nearest hour at or before a given time.
-        /// </summary>
-        /// <param name="detail">The detail.</param>
-        /// <param name="dateTime">The time.</param>
-        static void TrimRight(FuelTaxDetail detail, DateTime dateTime)
-        {
-            var hour = dateTime.Ticks / HourTicks;
-            var exitHour = detail.ExitTime.Ticks / HourTicks;
-            if (detail.ExitTime.Ticks % HourTicks > 0)
-            {
-                exitHour++;
-            }
-            if (hour < exitHour)
-            {
-                var hourCount = detail.HourlyOdometer.Count;
-                var hourIndex = (int)(hourCount - exitHour + hour);
-                detail.ExitTime = new DateTime(hour * HourTicks, DateTimeKind.Utc);
-                detail.ExitOdometer = detail.HourlyOdometer[hourIndex];
-                detail.ExitGpsOdometer = detail.HourlyGpsOdometer[hourIndex];
-                detail.ExitLatitude = detail.HourlyLatitude[hourIndex];
-                detail.ExitLongitude = detail.HourlyLongitude[hourIndex];
-                var removeCount = hourCount - hourIndex;
-                detail.HourlyOdometer.RemoveRange(hourIndex, removeCount);
-                detail.HourlyGpsOdometer.RemoveRange(hourIndex, removeCount);
-                detail.HourlyLatitude.RemoveRange(hourIndex, removeCount);
-                detail.HourlyLongitude.RemoveRange(hourIndex, removeCount);
-            }
         }
 
         /// <summary>
