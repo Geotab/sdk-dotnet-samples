@@ -8,6 +8,6 @@
     <RootNamespace>Geotab.SDK.ImportGroupsR</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1802" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1803" />
   </ItemGroup>
 </Project>
