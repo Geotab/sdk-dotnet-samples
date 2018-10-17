@@ -76,9 +76,7 @@ The feed example contains numerous other examples of what can be done with the f
 | 1 | Vehicle Serial Number | The unique serial number printed on the GO device | GT8010000001 |
 | 2 | Date | The date and time in UTC for the engine diagnostic reading. | 12/12/21 09:43:01 |
 | 3 | Diagnostic Name | The engine diagnostic description in English | Cranking Voltage |
-| 4 | Source Name | An indication what the source of this status data reading is. | J1938 or
-J1708 or
-Geotab Go etc. |
+| 4 | Source Name | An indication what the source of this status data reading is. | J1938 or J1708 or Geotab Go etc. |
 | 5 | Controller Name | The controller name for the given source. | Body Controller |
 | 6 | Value | The value associated with the status data reading. | 12.4 |
 | 7 | Units | The unit of measure associated with this reading. | Volts |
@@ -90,11 +88,8 @@ Geotab Go etc. |
 | 1 | Vehicle Serial Number | The unique serial number printed on the GO device | GT8010000001 |
 | 2 | Date | The date and time in UTC for the engine diagnostic reading | 12/12/21 09:43:01 |
 | 3 | Diagnostic Name | The engine diagnostic description in English | Cranking Voltage |
-| 4 | Failure Mode Name | The fault description in English | Voltage above normal or shorted high,
-Out of Calibration |
-| 5 | Failure Mode Source | An indication what the source of this fault reading is | J1938 or
-J1708 or
-Geotab Go etc |
+| 4 | Failure Mode Name | The fault description in English | Voltage above normal or shorted high, Out of Calibration |
+| 5 | Failure Mode Source | An indication what the source of this fault reading is | J1938 or J1708 or Geotab Go etc |
 | 6 | Controller Name | The controller name for the given source | Body Controller |
 
 ### CSV output
@@ -121,9 +116,7 @@ Geotab Go etc |
 | 4 | Date | The date and time in UTC for the engine diagnostic reading | 2012-07-13 20:36:36.000 |
 | 5 | Diagnostic Name | The engine diagnostic description in English | Cranking Voltage |
 | 6 | Diagnostic Code | The numeric value associated with a diagnostic | 1234 |
-| 7 | Source Name | An indication what the source of this status data reading is | J1938 or
-J1708 or
-Geotab Go etc. |
+| 7 | Source Name | An indication what the source of this status data reading is | J1938 or J1708 or Geotab Go etc. |
 | 8 | Controller Name | The controller name for the given source | Body Controller |
 | 9 | Value | The value associated with the status data reading | 12.4 |
 | 10 | Units | The unit of measure associated with this reading | Volts |
@@ -137,25 +130,16 @@ Geotab Go etc. |
 | 3 | VIN | The Vehicle Identification Number of the vehicle | 1FUBCYCS111111111 |
 | 4 | Date | The date and time in UTC for the engine diagnostic reading | 2012-07-13 20:36:36.000 |
 | 5 | Diagnostic Name | The engine diagnostic description in English | Cranking Voltage |
-| 6 | Failure Mode Name | The fault description in English | Voltage above normal or shorted high,
-Out of Calibration |
+| 6 | Failure Mode Name | The fault description in English | Voltage above normal or shorted high, Out of Calibration |
 | 7 | Failure Mode Code | The numeric value associated with a fault | 1234 |
-| 8 | Failure Mode Source | An indication what the source of this fault reading is | J1938 or
-J1708 or
-Geotab Go etc |
+| 8 | Failure Mode Source | An indication what the source of this fault reading is | J1938 or J1708 or Geotab Go etc |
 | 9 | Controller Name | The controller name for the given source | Body Controller |
 | 10 | Count | The number of times the fault occurred | 1 |
-| 11 | Active | Represents a fault code state code from the engine system of the specific device | None,
-Pending,
-Active |
-| 12 | Malfunction Lamp | Indicates if the malfunction lamp is on or off | 0 = off
-1 = on |
-| 13 | Red Stop Lamp | Indicates if the red stop lamp is on or off | 0 = off
-1 = on |
-| 14 | Amber Warning Lamp | Indicates if the amber warning lamp is on or off | 0 = off
-1 = on |
-| 15 | Protect Lamp | Indicates if the protect lamp is on or off | 0 = off
-1 = on |
+| 11 | Active | Represents a fault code state code from the engine system of the specific device | None, Pending, Active |
+| 12 | Malfunction Lamp | Indicates if the malfunction lamp is on or off | 0 = off 1 = on |
+| 13 | Red Stop Lamp | Indicates if the red stop lamp is on or off | 0 = off 1 = on |
+| 14 | Amber Warning Lamp | Indicates if the amber warning lamp is on or off | 0 = off 1 = on |
+| 15 | Protect Lamp | Indicates if the protect lamp is on or off | 0 = off 1 = on |
 | 16 | Dismiss Date | The date and time a user dismissed the fault | 2012-07-13 20:36:36.000 |
 | 17 | Dismiss User | The user who dismissed the fault | AUser@geotab.com |
 
@@ -182,9 +166,7 @@ Active |
 | 4 | VIN | The Vehicle Identification Number of the vehicle | 1FUBCYCS111111111 |
 | 5 | Diagnostic Name | The engine diagnostic description in English | Cranking Voltage |
 | 6 | Diagnostic Code | The numeric value associated with a diagnostic | 1234 |
-| 7 | Source Name | An indication what the source of this status data reading is | J1938 or
-J1708 or
-Geotab Go etc |
+| 7 | Source Name | An indication what the source of this status data reading is | J1938 or J1708 or Geotab Go etc |
 | 8 | Driver Name | The name of the drive (if there was one) for the trip | Bob Goodman |
 | 9 | Driver Keys | The key id of the driver (if there was one) for the trip | 100001, TA56EF2 |
 | 10 | Rule Name | The name of the rule that was broken to generate this exception event | Speeding, Idling |
