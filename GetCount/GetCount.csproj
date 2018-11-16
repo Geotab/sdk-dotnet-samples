@@ -9,6 +9,6 @@
     <RootNamespace>Geotab.SDK.GetCount</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1803" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1804" />
   </ItemGroup>
 </Project>
