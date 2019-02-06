@@ -9,6 +9,6 @@
     <RootNamespace>Geotab.SDK.SendTextMessage</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1804" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1901" />
   </ItemGroup>
 </Project>
