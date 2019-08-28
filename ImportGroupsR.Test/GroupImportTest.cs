@@ -10,6 +10,7 @@ using Geotab.SDK.ImportGroupsR;
 using Xunit;
 using Geotab.Drawing;
 using Xunit.Abstractions;
+using System.Threading.Tasks;
 
 namespace ImportGroupsR.Test
 {
@@ -44,19 +45,21 @@ namespace ImportGroupsR.Test
         /// Dummies the test.
         /// </summary>
         [Fact]
-        public void ImportThreeGroups_Test()
+        public async Task ImportThreeGroups_Test()
         {
-            InitializeDatabaseWithThreeGroups(api);
-            Verify_ImportThreeGroups(api);
+            await SetupAsync();
+            await InitializeDatabaseWithThreeGroupsAsync(api);
+            await Verify_ImportThreeGroupsAsync(api);
         }
 
         /// <summary>
         /// ParseFileWithThreeGroups_GroupBreadthFirstIterator_Test
         /// </summary>
         [Fact]
-        public void ParseFileWithThreeGroups_GroupBreadthFirstIterator_Test()
+        public async Task ParseFileWithThreeGroups_GroupBreadthFirstIterator_Test()
         {
-            var parser = InitializeParserWithThreeGroups(api);
+            await SetupAsync();
+            var parser = await InitializeParserWithThreeGroupsAsync(api);
             var groupIterator = new GroupBreadthFirstIterator(parser.FirstLineParentGroupParsed);
             var iterationCount = 0;
             foreach (var group in groupIterator)
@@ -79,170 +82,184 @@ namespace ImportGroupsR.Test
         /// 
         /// </summary>
         [Fact]
-        public void ImportDatabaseInitializationFile_Test()
+        public async Task ImportDatabaseInitializationFile_Test()
         {
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization);
-            Verify_DatabaseInitialization(api);
+            await SetupAsync();
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization);
+            await Verify_DatabaseInitializationAsync(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_Added_Test()
+        public async Task ImportGroups_Added_Test()
         {
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization);
-            SimulateParsingAndImportFromFile(api, CreateInputFileForAdded, Parser_RowParsed, Importer_GroupImported);
-            Verify_Added(api);
+            await SetupAsync();
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization);
+            await SimulateParsingAndImportFromFileAsync(api, CreateInputFileForAdded, Parser_RowParsed, Importer_GroupImported);
+            await Verify_AddedAsync(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_Updated_Test()
+        public async Task ImportGroups_Updated_Test()
         {
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization);
+            await SetupAsync();
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization);
             var importUpdated = new ImportUpdated(this);
-            SimulateParsingAndImportFromFile(api, importUpdated.CreateInputFileForUpdated, Parser_RowParsed, Importer_GroupImported);
-            importUpdated.Verify_Updated(api);
+            await SimulateParsingAndImportFromFileAsync(api, importUpdated.CreateInputFileForUpdated, Parser_RowParsed, Importer_GroupImported);
+            await importUpdated.Verify_UpdatedAsync(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_Deleted_Test()
+        public async Task ImportGroups_Deleted_Test()
         {
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization);
+            await SetupAsync();
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization);
             var importDeleted = new ImportDeleted(this);
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_Deleted(api);
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_Deleted(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_WithZones_Deleted_Test()
+        public async Task ImportGroups_WithZones_Deleted_Test()
         {
+            await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization, new List<CreateAssetsForGroups> { importDeleted.CreateZonesForDeleted });
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateZonesForDeletedAsync });
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_WithDevices_Deleted_Test()
+        public async Task ImportGroups_WithDevices_Deleted_Test()
         {
+            await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization, new List<CreateAssetsForGroups> { importDeleted.CreateDevicesForDeleted });
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateDevicesForDeletedAsync });
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_WithUsers_Deleted_Test()
+        public async Task ImportGroups_WithUsers_Deleted_Test()
         {
+            await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization, new List<CreateAssetsForGroups> { importDeleted.CreateUsersForDeleted });
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateUsersForDeletedAsync });
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_WithDrivers_Deleted_Test()
+        public async Task ImportGroups_WithDrivers_Deleted_Test()
         {
+            await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization, new List<CreateAssetsForGroups> { importDeleted.CreateDriversForDeleted });
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateDriversForDeletedAsync });
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_WithRules_Deleted_Test()
+        public async Task ImportGroups_WithRules_Deleted_Test()
         {
+            await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization, new List<CreateAssetsForGroups> { importDeleted.CreateRulesForDeleted });
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateRulesForDeletedAsync });
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
 
         /// <summary>
         /// Imports the groups with custom report schedule emails test.
         /// </summary>
         [Fact]
-        public void ImportGroups_WithCustomReportScheduleNormalReports_Deleted_Test()
+        public async Task ImportGroups_WithCustomReportScheduleNormalReports_Deleted_Test()
         {
+            await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization, new List<CreateAssetsForGroups> { importDeleted.CreateCustomReportScheduleForDeleted_NormalReport });
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateCustomReportScheduleForDeleted_NormalReportAsync });
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
 
         /// <summary>
         /// Imports the groups with custom report schedule emails test.
         /// </summary>
         [Fact]
-        public void ImportGroups_WithCustomReportScheduleDashboards_Deleted_Test()
+        public async Task ImportGroups_WithCustomReportScheduleDashboards_Deleted_Test()
         {
+            await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization, new List<CreateAssetsForGroups> { importDeleted.CreateCustomReportScheduleForDeleted_Dashboard });
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateCustomReportScheduleForDeleted_DashboardAsync });
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
 
         /// <summary>
         /// Imports the groups with custom report schedule emails test.
         /// </summary>
         [Fact]
-        public void ImportGroups_WithCustomReportScheduleEmails_Deleted_Test()
+        public async Task ImportGroups_WithCustomReportScheduleEmails_Deleted_Test()
         {
+            await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization, new List<CreateAssetsForGroups> { importDeleted.CreateCustomReportScheduleForDeleted_EmailPdf });
-            SimulateParsingAndImportFromFile(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateCustomReportScheduleForDeleted_EmailPdfAsync });
+            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
+            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_MovedExisting_Test()
+        public async Task ImportGroups_MovedExisting_Test()
         {
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization);
+            await SetupAsync();
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization);
             var importUpdated = new ImportMovedUpdated(this, null, null, 0);
-            SimulateParsingAndImportFromFile(api, importUpdated.CreateInputFileForMovedUpdated, Parser_RowParsed, Importer_GroupImported);
-            importUpdated.Verify_MovedUpdated(api);
+            await SimulateParsingAndImportFromFileAsync(api, importUpdated.CreateInputFileForMovedUpdated, Parser_RowParsed, Importer_GroupImported);
+            await importUpdated.Verify_MovedUpdated(api);
         }
 
         /// <summary>
         /// 
         /// </summary>
         [Fact]
-        public void ImportGroups_MovedUpdated_Test()
+        public async Task ImportGroups_MovedUpdated_Test()
         {
-            InitializeDatabase(api, CreateInputFileForDatabaseInitialization);
+            await SetupAsync();
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization);
             var importUpdated = new ImportMovedUpdated(this);
-            SimulateParsingAndImportFromFile(api, importUpdated.CreateInputFileForMovedUpdated, Parser_RowParsed, Importer_GroupImported);
-            importUpdated.Verify_MovedUpdated(api);
+            await SimulateParsingAndImportFromFileAsync(api, importUpdated.CreateInputFileForMovedUpdated, Parser_RowParsed, Importer_GroupImported);
+            await importUpdated.Verify_MovedUpdated(api);
         }
 
-        void Verify_ImportThreeGroups(API api)
+        async Task Verify_ImportThreeGroupsAsync(API api)
         {
-            GetAllGroupsFromDB(api, out lookupSreferenceToGroupFromDbForVerification, out lookupIdToGroupFromDbForVerification, out groupsInDBWithNonUniqueReferenceLookup, out groupsInDBWithNonUniqueIdLookup);
+            (lookupSreferenceToGroupFromDbForVerification, lookupIdToGroupFromDbForVerification, groupsInDBWithNonUniqueReferenceLookup, groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
             Assert.Equal(numberOfLinesParsed + 1, lookupSreferenceToGroupFromDbForVerification.Count);
 
             for (int i = 1; i < 3; i++)
@@ -255,9 +272,9 @@ namespace ImportGroupsR.Test
             }
         }
 
-        void Verify_DatabaseInitialization(API api)
+        async Task Verify_DatabaseInitializationAsync(API api)
         {
-            GetAllGroupsFromDB(api, out lookupSreferenceToGroupFromDbForVerification, out lookupIdToGroupFromDbForVerification, out groupsInDBWithNonUniqueReferenceLookup, out groupsInDBWithNonUniqueIdLookup);
+            (lookupSreferenceToGroupFromDbForVerification, lookupIdToGroupFromDbForVerification, groupsInDBWithNonUniqueReferenceLookup, groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
             Assert.Equal(numberOfLinesParsed + 1, lookupSreferenceToGroupFromDbForVerification.Count);
             for (int i = 1; i <= 3; i++)
             {
@@ -318,9 +335,9 @@ namespace ImportGroupsR.Test
             }
         }
 
-        void Verify_Added(API api)
+        async Task Verify_AddedAsync(API api)
         {
-            GetAllGroupsFromDB(api, out lookupSreferenceToGroupFromDbForVerification, out lookupIdToGroupFromDbForVerification, out groupsInDBWithNonUniqueReferenceLookup, out groupsInDBWithNonUniqueIdLookup);
+            (lookupSreferenceToGroupFromDbForVerification, lookupIdToGroupFromDbForVerification, groupsInDBWithNonUniqueReferenceLookup, groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
             Assert.Equal(numberOfLinesParsed + 1, lookupSreferenceToGroupFromDbForVerification.Count);
             for (int i = 1; i <= 3; i++)
             {
@@ -405,9 +422,9 @@ namespace ImportGroupsR.Test
                 return CreateInputFile(inputItems, textWriter);
             }
 
-            public void Verify_Updated(API api)
+            public async Task Verify_UpdatedAsync(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
                 Assert.Equal(testClass.numberOfLinesParsed + 1, testClass.lookupSreferenceToGroupFromDbForVerification.Count);
                 for (int i = 1; i <= 3; i++)
                 {
@@ -480,61 +497,61 @@ namespace ImportGroupsR.Test
                 return CreateInputFile(inputItems, textWriter);
             }
 
-            public void CreateZonesForDeleted(API api)
+            public async Task CreateZonesForDeletedAsync(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
-                CreateZonesForDeletedAfterGettingGroupsFromDB(api);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
+                await CreateZonesForDeletedAfterGettingGroupsFromDBAsync(api);
             }
 
-            public void CreateDevicesForDeleted(API api)
+            public async Task CreateDevicesForDeletedAsync(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
-                CreateDevicesForDeletedAfterGettingGroupsFromDB(api);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
+                await CreateDevicesForDeletedAfterGettingGroupsFromDAsyncB(api);
             }
 
-            public void CreateUsersForDeleted(API api)
+            public async Task CreateUsersForDeletedAsync(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
-                CreateUsersForDeletedAfterGettingGroupsFromDB(api);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
+                await CreateUsersForDeletedAfterGettingGroupsFromDBAsync(api);
             }
 
-            public void CreateDriversForDeleted(API api)
+            public async Task CreateDriversForDeletedAsync(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
-                CreateDriversForDeletedAfterGettingGroupsFromDB(api);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
+                await CreateDriversForDeletedAfterGettingGroupsFromDBAsync(api);
             }
 
-            public void CreateRulesForDeleted(API api)
+            public async Task CreateRulesForDeletedAsync(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
-                CreateRulesForDeletedAfterGettingGroupsFromDB(api);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
+                await CreateRulesForDeletedAfterGettingGroupsFromDBAsync(api);
             }
 
-            public void CreateCustomReportScheduleForDeleted_NormalReport(API api)
+            public async Task CreateCustomReportScheduleForDeleted_NormalReportAsync(API api)
             {
-                CreateCustomReportScheduleForDeleted(api, ReportDestination.NormalReport);
+                await CreateCustomReportScheduleForDeletedAsync(api, ReportDestination.NormalReport);
             }
 
-            public void CreateCustomReportScheduleForDeleted_Dashboard(API api)
+            public async Task CreateCustomReportScheduleForDeleted_DashboardAsync(API api)
             {
-                CreateCustomReportScheduleForDeleted(api, ReportDestination.Dashboard);
+                await CreateCustomReportScheduleForDeletedAsync(api, ReportDestination.Dashboard);
             }
 
-            public void CreateCustomReportScheduleForDeleted_EmailPdf(API api)
+            public async Task CreateCustomReportScheduleForDeleted_EmailPdfAsync(API api)
             {
-                CreateCustomReportScheduleForDeleted(api, ReportDestination.EmailPdf);
+                await CreateCustomReportScheduleForDeletedAsync(api, ReportDestination.EmailPdf);
             }
 
-            void CreateCustomReportScheduleForDeleted(API api, ReportDestination reportDestination)
+            async Task CreateCustomReportScheduleForDeletedAsync(API api, ReportDestination reportDestination)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
-                CreateCustomReportScheduleAfterGettingGroupsFromDB(api, reportDestination);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
+                await CreateCustomReportScheduleAfterGettingGroupsFromDBAsync(api, reportDestination);
             }
 
-            void CreateZonesForDeletedAfterGettingGroupsFromDB(API api)
+            async Task CreateZonesForDeletedAfterGettingGroupsFromDBAsync(API api)
             {
-                testClass.AddZoneToGroup(api, GenerateSReference(2, 3));
-                testClass.AddZoneToGroup(api, GenerateSReference(1, 2));
+                await testClass.AddZoneToGroupAsync(api, GenerateSReference(2, 3));
+                await testClass.AddZoneToGroupAsync(api, GenerateSReference(1, 2));
             }
 
             /// <summary>
@@ -542,58 +559,58 @@ namespace ImportGroupsR.Test
             /// </summary>
             /// <param name="api"></param>
             /// <returns>device number of the last device created</returns>
-            int CreateDevicesForDeletedAfterGettingGroupsFromDB(API api)
+            async Task<int> CreateDevicesForDeletedAfterGettingGroupsFromDAsyncB(API api)
             {
                 var sReference = GenerateSReference(2, 3);
                 int deviceNumber = 1;
-                deviceNumber = testClass.AddDevicesToGroup(api, sReference, deviceNumber, 2) + 1;
+                deviceNumber = await testClass.AddDevicesToGroupAsync(api, sReference, deviceNumber, 2) + 1;
                 sReference = GenerateSReference(1, 2);
-                deviceNumber = testClass.AddDevicesToGroup(api, sReference, deviceNumber);
+                deviceNumber = await testClass.AddDevicesToGroupAsync(api, sReference, deviceNumber);
                 return deviceNumber;
             }
 
-            int CreateUsersForDeletedAfterGettingGroupsFromDB(API api)
+            async Task<int> CreateUsersForDeletedAfterGettingGroupsFromDBAsync(API api)
             {
                 var sReference = GenerateSReference(2, 3);
                 int userNumber = 1;
-                userNumber = testClass.AddUsersToGroup(api, sReference, userNumber, 2) + 1;
+                userNumber = await testClass.AddUsersToGroupAsync(api, sReference, userNumber, 2) + 1;
                 sReference = GenerateSReference(1, 2);
-                userNumber = testClass.AddUsersToGroup(api, sReference, userNumber);
+                userNumber = await testClass.AddUsersToGroupAsync(api, sReference, userNumber);
                 return userNumber;
             }
 
-            void CreateDriversForDeletedAfterGettingGroupsFromDB(API api)
+            async Task CreateDriversForDeletedAfterGettingGroupsFromDBAsync(API api)
             {
                 var group = testClass.GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(GenerateSReference(2, 3));
-                testClass.AddDriversToGroup(api, group);
-                testClass.AddDriversToGroup(api, group);
-                testClass.AddDriversToGroup(api, testClass.GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(GenerateSReference(1, 2)));
+                await testClass.AddDriversToGroupAsync(api, group);
+                await testClass.AddDriversToGroupAsync(api, group);
+                await testClass.AddDriversToGroupAsync(api, testClass.GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(GenerateSReference(1, 2)));
             }
 
-            int CreateRulesForDeletedAfterGettingGroupsFromDB(API api)
+            async Task<int> CreateRulesForDeletedAfterGettingGroupsFromDBAsync(API api)
             {
                 var sReference = GenerateSReference(2, 3);
                 int ruleNumber = 1;
-                ruleNumber = testClass.AddRulesToGroup(api, sReference, ruleNumber, 2) + 1;
+                ruleNumber = await testClass.AddRulesToGroupAsync(api, sReference, ruleNumber, 2) + 1;
                 sReference = GenerateSReference(1, 2);
-                ruleNumber = testClass.AddRulesToGroup(api, sReference, ruleNumber);
+                ruleNumber = await testClass.AddRulesToGroupAsync(api, sReference, ruleNumber);
                 return ruleNumber;
             }
 
-            int CreateCustomReportScheduleAfterGettingGroupsFromDB(API api, ReportDestination reportDestination)
+            async Task<int> CreateCustomReportScheduleAfterGettingGroupsFromDBAsync(API api, ReportDestination reportDestination)
             {
                 var sReference = GenerateSReference(2, 3);
                 int reportNumber = 1;
-                reportNumber = testClass.AddCustomReportScheduleToGroup(api, sReference, reportDestination, ReportToGroupAssociation.IncludeAllChildrenGroups, reportNumber) + 1;
-                reportNumber = testClass.AddCustomReportScheduleToGroup(api, sReference, reportDestination, ReportToGroupAssociation.IncludeDirectChildrenOnlyGroups, reportNumber) + 1;
+                reportNumber = await testClass.AddCustomReportScheduleToGroupAsync(api, sReference, reportDestination, ReportToGroupAssociation.IncludeAllChildrenGroups, reportNumber) + 1;
+                reportNumber = await testClass.AddCustomReportScheduleToGroupAsync(api, sReference, reportDestination, ReportToGroupAssociation.IncludeDirectChildrenOnlyGroups, reportNumber) + 1;
                 sReference = GenerateSReference(1, 2);
-                reportNumber = testClass.AddCustomReportScheduleToGroup(api, sReference, reportDestination, ReportToGroupAssociation.ScopeGroups, reportNumber);
+                reportNumber = await testClass.AddCustomReportScheduleToGroupAsync(api, sReference, reportDestination, ReportToGroupAssociation.ScopeGroups, reportNumber);
                 return reportNumber;
             }
 
-            public void Verify_WithZones_Deleted(API api)
+            public async Task Verify_WithZones_DeletedAsync(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
                 Assert.Equal(testClass.numberOfLinesParsed + 3, testClass.lookupSreferenceToGroupFromDbForVerification.Count);
                 for (int i = 1; i <= 2; i++)
                 {
@@ -609,9 +626,9 @@ namespace ImportGroupsR.Test
                 }
             }
 
-            public void Verify_WithOneAssociatedAssetClass_Deleted(API api)
+            public async Task Verify_WithOneAssociatedAssetClass_Deleted(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
                 Assert.Equal(testClass.numberOfLinesParsed + 3, testClass.lookupSreferenceToGroupFromDbForVerification.Count);
                 for (int i = 1; i <= 2; i++)
                 {
@@ -632,9 +649,9 @@ namespace ImportGroupsR.Test
             /// because all these tests have similar initial group structure, "desired after deletion" and "actual after deletion" group structure
             /// </summary>
             /// <param name="api">The API.</param>
-            public void Verify_Deleted(API api)
+            public async Task Verify_Deleted(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
                 Assert.Equal(testClass.numberOfLinesParsed + 1, testClass.lookupSreferenceToGroupFromDbForVerification.Count);
                 for (int i = 1; i <= 2; i++)
                 {
@@ -722,9 +739,9 @@ namespace ImportGroupsR.Test
                 return CreateInputFile(inputItems, textWriter);
             }
 
-            public void Verify_MovedUpdated(API api)
+            public async Task Verify_MovedUpdated(API api)
             {
-                GetAllGroupsFromDB(api, out testClass.lookupSreferenceToGroupFromDbForVerification, out testClass.lookupIdToGroupFromDbForVerification, out testClass.groupsInDBWithNonUniqueReferenceLookup, out testClass.groupsInDBWithNonUniqueIdLookup);
+                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
                 Assert.Equal(testClass.numberOfLinesParsed + 1, testClass.lookupSreferenceToGroupFromDbForVerification.Count);
                 for (int i = 1; i <= 3; i++)
                 {
@@ -773,37 +790,36 @@ namespace ImportGroupsR.Test
             }
         }
 
-        ImportGroupParser InitializeParserWithThreeGroups(API api)
+        async Task<ImportGroupParser> InitializeParserWithThreeGroupsAsync(API api)
         {
-            var firstLineParentGroup = CreateFirstLineParentGroup(api);
-            return SimulateParsingFromFile(api, CreateInputFileForSimpleImport, Parser_RowParsed);
+            var firstLineParentGroup = await CreateFirstLineParentGroupAsync(api);
+            return await SimulateParsingFromFileAsync(api, CreateInputFileForSimpleImport, Parser_RowParsed);
         }
 
-        void InitializeDatabaseWithThreeGroups(API api)
+        async Task InitializeDatabaseWithThreeGroupsAsync(API api)
         {
-            var firstLineParentGroup = CreateFirstLineParentGroup(api);
-            SimulateParsingAndImportFromFile(api, CreateInputFileForSimpleImport, Parser_RowParsed, Importer_GroupImported);
+            var firstLineParentGroup = await CreateFirstLineParentGroupAsync(api);
+            await SimulateParsingAndImportFromFileAsync(api, CreateInputFileForSimpleImport, Parser_RowParsed, Importer_GroupImported);
         }
 
-        void InitializeDatabase(API api, CreateInputFileDelegate inputFileFiller, IList<CreateAssetsForGroups> assetCreators = null)
+        async Task InitializeDatabaseAsync(API api, CreateInputFileDelegate inputFileFiller, IList<Func<API, Task>> assetCreators = null)
         {
             Log.WriteLine("Database Initialization Start");
-            var firstLineParentGroup = CreateFirstLineParentGroup(api);
-            SimulateParsingAndImportFromFile(api, CreateInputFileForDatabaseInitialization, Parser_RowParsed, Importer_GroupImported);
+            var firstLineParentGroup = await CreateFirstLineParentGroupAsync(api);
+            await SimulateParsingAndImportFromFileAsync(api, CreateInputFileForDatabaseInitialization, Parser_RowParsed, Importer_GroupImported);
             Log.WriteLine($"Database Initialization End{Environment.NewLine}");
             if (assetCreators != null)
             {
                 foreach (var assetCreator in assetCreators)
                 {
-                    assetCreator(api);
+                    await assetCreator(api);
                 }
             }
         }
 
         delegate int CreateInputFileDelegate(TextWriter textWriter);
-        delegate void CreateAssetsForGroups(API api);
 
-        ImportGroupParser SimulateParsingFromFile(API api, CreateInputFileDelegate inputFileFiller, EventHandler<RowParsedEventArgs<Group>> rowParsedHandler = null)
+        async Task<ImportGroupParser> SimulateParsingFromFileAsync(API api, CreateInputFileDelegate inputFileFiller, EventHandler<RowParsedEventArgs<Group>> rowParsedHandler = null)
         {
             var parser = new ImportGroupParser(api, FirstLineParentSreference);
             if (rowParsedHandler != null)
@@ -817,7 +833,7 @@ namespace ImportGroupsR.Test
                 {
                     numEntries = inputFileFiller(streamWriter);
                     stream.Position = 0;
-                    var groupsParsedList = parser.Parse(stream);
+                    var groupsParsedList = await parser.ParseAsync(stream);
                     numberOfLinesParsed = groupsParsedList.Count;
                 }
                 //Test Parser
@@ -826,16 +842,16 @@ namespace ImportGroupsR.Test
             return parser;
         }
 
-        void SimulateParsingAndImportFromFile(API api, CreateInputFileDelegate inputFileFiller, EventHandler<RowParsedEventArgs<Group>> rowParsedHandler = null, EventHandler<EntityImportedEventArgs<GroupImporter.GroupWithLoggingData>> itemImportedHandler = null, bool deleteEmptyGroups = false, bool moveAssetsUp = false)
+        async Task SimulateParsingAndImportFromFileAsync(API api, CreateInputFileDelegate inputFileFiller, EventHandler<RowParsedEventArgs<Group>> rowParsedHandler = null, EventHandler<EntityImportedEventArgs<GroupImporter.GroupWithLoggingData>> itemImportedHandler = null, bool deleteEmptyGroups = false, bool moveAssetsUp = false)
         {
-            var parser = SimulateParsingFromFile(api, inputFileFiller, rowParsedHandler);
+            var parser = await SimulateParsingFromFileAsync(api, inputFileFiller, rowParsedHandler);
 
             var importer = new GroupImporter(api, parser.FirstLineParentGroupParsed, parser.FirstLineParentGroupFromDB, parser.GroupsParsedList.Count, parser.GroupLookupParsed, parser.GroupLookupFromDB, deleteEmptyGroups, moveAssetsUp);
             if (itemImportedHandler != null)
             {
                 importer.EntityImported += itemImportedHandler;
             }
-            importer.DetermineDispositionAndImportGroups();
+            await importer.DetermineDispositionAndImportGroupsAsync();
         }
 
         int CreateInputFileForSimpleImport(TextWriter textWriter)
@@ -893,11 +909,11 @@ namespace ImportGroupsR.Test
             return CreateInputFile(inputItems, textWriter);
         }
 
-        void AddZoneToGroup(API api, string groupSreference)
+        async Task AddZoneToGroupAsync(API api, string groupSreference)
         {
             var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
             var zone = testValueHelper.GetZone(new List<Group> { group });
-            zone.Id = api.Call<Id>("Add", typeof(Zone), new { entity = zone });
+            zone.Id = await api.CallAsync<Id>("Add", typeof(Zone), new { entity = zone });
         }
 
         /// <summary>
@@ -908,20 +924,20 @@ namespace ImportGroupsR.Test
         /// <param name="deviceNumber"></param>
         /// <param name="deviceCount"></param>
         /// <returns>number of the last added device</returns>
-        int AddDevicesToGroup(API api, string groupSreference, int deviceNumber, int deviceCount = 1)
+        async Task<int> AddDevicesToGroupAsync(API api, string groupSreference, int deviceNumber, int deviceCount = 1)
         {
             var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
             for (int i = 0; i < deviceCount; i++)
             {
                 deviceNumber += i;
                 var device = testValueHelper.GetGoDevice(deviceNumber, new List<Group> { group });
-                device.Id = api.Call<Id>("Add", typeof(Device), new { entity = device });
+                device.Id = await api.CallAsync<Id>("Add", typeof(Device), new { entity = device });
                 Assert.NotNull(device.Id);
             }
             return deviceNumber;
         }
 
-        int AddUsersToGroup(API api, string groupSreference, int userNumber, int userCount = 1)
+        async Task<int> AddUsersToGroupAsync(API api, string groupSreference, int userNumber, int userCount = 1)
         {
             var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
             var organizationGroups = new List<Group> { group };
@@ -930,29 +946,29 @@ namespace ImportGroupsR.Test
             for (int i = 0; i < userCount; i++)
             {
                 userNumber += i;
-                var user = User.CreateBasicUser(null, $"User{userNumber}@geotab.com", $"Fname{userNumber}", $"Lname{userNumber}", $"Password{userNumber}", "", "", "", DateTime.MinValue, DateTime.MaxValue, organizationGroups, reportGroups, securityGroups, null);
-                user.Id = api.Call<Id>("Add", typeof(User), new { entity = user });
+                var user = User.CreateBasicUser(null, null, $"User{userNumber}@geotab.com", $"Fname{userNumber}", $"Lname{userNumber}", $"Password{userNumber}", "", "", "", DateTime.MinValue, DateTime.MaxValue, organizationGroups, reportGroups, securityGroups, null);
+                user.Id = await api.CallAsync<Id>("Add", typeof(User), new { entity = user });
                 Assert.NotNull(user.Id);
             }
             return userNumber;
         }
 
-        void AddDriversToGroup(API api, Group group)
+        async Task AddDriversToGroupAsync(API api, Group group)
         {
             var companyGroups = new List<Group> { group };
             var driver = testValueHelper.GetDriver();
             driver.CompanyGroups = driver.DriverGroups = companyGroups;
-            driver.Id = api.Call<Id>("Add", typeof(User), new { entity = driver });
+            driver.Id = await api.CallAsync<Id>("Add", typeof(User), new { entity = driver });
         }
 
-        int AddRulesToGroup(API api, string groupSreference, int ruleNumber, int ruleCount = 1)
+        async Task<int> AddRulesToGroupAsync(API api, string groupSreference, int ruleNumber, int ruleCount = 1)
         {
             var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
             for (int i = 0; i < ruleCount; i++)
             {
                 ruleNumber += i;
                 var rule = new Rule(null, null, $"Rule{ruleNumber}", new Color(255, 127, 80), "Comment", new List<Group> { group }, ExceptionRuleBaseType.Custom, DateTime.UtcNow, DateTime.MaxValue);
-                rule.Id = api.Call<Id>("Add", typeof(Rule), new { entity = rule });
+                rule.Id = await api.CallAsync<Id>("Add", typeof(Rule), new { entity = rule });
                 Assert.NotNull(rule.Id);
             }
             return ruleNumber;
@@ -977,7 +993,7 @@ namespace ImportGroupsR.Test
             IncludeDirectChildrenOnlyGroups
         }
 
-        int AddCustomReportScheduleToGroup(API api, string groupSreference, ReportDestination reportDestination, ReportToGroupAssociation groupToReportAssociation, int reportNumber, int reportCount = 1)
+        async Task<int> AddCustomReportScheduleToGroupAsync(API api, string groupSreference, ReportDestination reportDestination, ReportToGroupAssociation groupToReportAssociation, int reportNumber, int reportCount = 1)
         {
             var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
             for (int i = 0; i < reportCount; i++)
@@ -1001,7 +1017,7 @@ namespace ImportGroupsR.Test
                         break;
                 }
                 var report = testValueHelper.GetCustomReportSchedule($"Report{reportNumber}", reportDestination, scopeGroups, includeAllChildrenGroups, includeDirectChildrenOnlyGroups);
-                report.Id = api.Call<Id>("Add", typeof(CustomReportSchedule), new { entity = report });
+                report.Id = await api.CallAsync<Id>("Add", typeof(CustomReportSchedule), new { entity = report });
                 Assert.NotNull(report.Id);
             }
             return reportNumber;
@@ -1011,7 +1027,7 @@ namespace ImportGroupsR.Test
         {
             if (!lookupSreferenceToGroupFromDbForVerification.TryGetValue(groupSreference, out Group group))
             {
-                Assert.False(true, $"In {nameof(AddDevicesToGroup)}: Group with SReference {groupSreference} is not in the database.");
+                Assert.False(true, $"In {nameof(AddDevicesToGroupAsync)}: Group with SReference {groupSreference} is not in the database.");
             }
             return group;
         }
@@ -1041,9 +1057,9 @@ namespace ImportGroupsR.Test
         /// </summary>
         /// <param name="api"></param>
         /// <returns></returns>
-        Group CreateFirstLineParentGroup(API api)
+        async Task<Group> CreateFirstLineParentGroupAsync(API api)
         {
-            var groups = api.Call<List<Group>>("Get", typeof(Group));
+            var groups = await api.CallAsync<List<Group>>("Get", typeof(Group));
             foreach (var group in groups)
             {
                 if (group.Reference.Equals(FirstLineParentSreference))
@@ -1060,7 +1076,7 @@ namespace ImportGroupsR.Test
             };
             parentGroup.PopulateDefaults();
 
-            parentGroup.Id = api.Call<Id>("Add", typeof(Group), new { entity = parentGroup });
+            parentGroup.Id = await api.CallAsync<Id>("Add", typeof(Group), new { entity = parentGroup });
             return parentGroup;
         }
 
@@ -1072,11 +1088,15 @@ namespace ImportGroupsR.Test
         /// <param name="lookupIdToGroup">The lookup identifier to group.</param>
         /// <param name="groupsWithNonUniqueReferenceLookup">The lookup of groups with non-unique references</param>
         /// <param name="groupsWithNonUniqueIdLookup">The lookup of groups with non-unique Ids</param>
-        static void GetAllGroupsFromDB(API api, out Dictionary<string, Group> lookupSreferenceToGroup, out Dictionary<Id, Group> lookupIdToGroup, out IDictionary<string, IList<Group>> groupsWithNonUniqueReferenceLookup, out IDictionary<Id, IList<Group>> groupsWithNonUniqueIdLookup)
+        static async Task<(Dictionary<string, Group>, Dictionary<Id, Group>, IDictionary<string, IList<Group>>, IDictionary<Id, IList<Group>>)> GetAllGroupsFromDBAsync(API api)
         {
-            IList<Group> groupListFromDB = api.Call<List<Group>>("Get", typeof(Group));
-            lookupSreferenceToGroup = RowParser<Group>.CreateDictionary(groupListFromDB, g => g.Reference, out groupsWithNonUniqueReferenceLookup);
-            lookupIdToGroup = RowParser<Group>.CreateDictionary(groupListFromDB, g => g.Id, out groupsWithNonUniqueIdLookup);
+            IList<Group> groupListFromDB = await api.CallAsync<List<Group>>("Get", typeof(Group));
+            
+            IDictionary<string, IList<Group>> groupsWithNonUniqueReferenceLookup;
+            IDictionary<Id, IList<Group>> groupsWithNonUniqueIdLookup;
+            Dictionary<string, Group> lookupSreferenceToGroup = RowParser<Group>.CreateDictionary(groupListFromDB, g => g.Reference, out groupsWithNonUniqueReferenceLookup);
+            Dictionary<Id, Group> lookupIdToGroup = RowParser<Group>.CreateDictionary(groupListFromDB, g => g.Id, out groupsWithNonUniqueIdLookup);
+            return (lookupSreferenceToGroup, lookupIdToGroup, groupsWithNonUniqueReferenceLookup, groupsWithNonUniqueIdLookup);
         }
 
         static string GenerateName(int level, int groupNumberInLevel, string postfix = null)

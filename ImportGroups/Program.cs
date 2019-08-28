@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
@@ -63,7 +64,7 @@ namespace Geotab.SDK.ImportGroups
         /// A complete Geotab API object and method reference is available at the Geotab Developer page.
         /// </summary>
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project &gt; Properties &gt; Debug Tab &gt; Start Options: Command line arguments.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -109,7 +110,7 @@ namespace Geotab.SDK.ImportGroups
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
-                api.Authenticate();
+                await api.AuthenticateAsync();
 
                 // Start import
                 Console.WriteLine("Importing...");
@@ -118,7 +119,7 @@ namespace Geotab.SDK.ImportGroups
                 // For example: The system will always have a RootGroup (ObjectModel.RootGroup) with an CompanyGroup (ObjectModel.CompanyGroup) as a child.
 
                 // Load the all the nodes in the system this user has access to into this dictionary.
-                Dictionary<string, Group> existingGroupDictionary = PopulateGroupDictionary(api);
+                Dictionary<string, Group> existingGroupDictionary = await PopulateGroupDictionaryAsync(api);
 
                 // Start adding the new Groups we retrieved from the file.
                 foreach (GroupRow row in groupRows)
@@ -139,7 +140,7 @@ namespace Geotab.SDK.ImportGroups
                         // This will need re-loading when there is a node we previously added that we now want to assign children to.
                         if (!existingGroupDictionary.ContainsKey(parentGroupName.ToLowerInvariant()))
                         {
-                            existingGroupDictionary = PopulateGroupDictionary(api);
+                            existingGroupDictionary = await PopulateGroupDictionaryAsync(api);
                         }
 
                         // Check for non-organization Group in the dictionary of nodes that exist in the system.
@@ -170,7 +171,7 @@ namespace Geotab.SDK.ImportGroups
                     {
                         // Make API call to add the node.
                         var groupToAdd = new Group(null, parentGroup, row.GroupName);
-                        api.Call<Id>("Add", typeof(Group), new { entity = groupToAdd });
+                        await api.CallAsync<Id>("Add", typeof(Group), new { entity = groupToAdd });
                         Console.WriteLine($"Successfully added: {row.GroupName}");
                     }
                     catch (Exception exception)
@@ -197,9 +198,9 @@ namespace Geotab.SDK.ImportGroups
         /// </summary>
         /// <param name="api">The Geotab API object.</param>
         /// <returns>A dictionary populated with the <see cref="Group"/> name (Key) and <see cref="Group"/> (Value)</returns>
-        static Dictionary<string, Group> PopulateGroupDictionary(API api)
+        static async Task<Dictionary<string, Group>> PopulateGroupDictionaryAsync(API api)
         {
-            var dataStoreGroups = api.Call<IList<Group>>("Get", typeof(Group));
+            var dataStoreGroups = await api.CallAsync<IList<Group>>("Get", typeof(Group));
 
             var groupDictionary = new Dictionary<string, Group>(dataStoreGroups.Count);
             var nonUniqueGroups = new HashSet<string>();

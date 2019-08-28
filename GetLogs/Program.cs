@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
@@ -21,7 +22,7 @@ namespace Geotab.SDK.GetLogs
         ///
         /// A complete Geotab API object and method reference is available at the Geotab Developer page.
         /// </summary>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -56,7 +57,7 @@ namespace Geotab.SDK.GetLogs
                 try
                 {
                     // Authenticate user
-                    api.Authenticate();
+                    await api.AuthenticateAsync();
                     Console.WriteLine("Successfully Authenticated");
                 }
                 catch (InvalidUserException ex)
@@ -83,7 +84,7 @@ namespace Geotab.SDK.GetLogs
                     {
                         SerialNumber = serialNumber
                     };
-                    IList<Device> devices = api.Call<IList<Device>>("Get", typeof(Device), new { search = deviceSearch });
+                    IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device), new { search = deviceSearch });
                     if (devices.Count > 0)
                     {
                         Console.WriteLine("Device found");
@@ -111,7 +112,7 @@ namespace Geotab.SDK.GetLogs
                         FromDate = fromDate,
                         ToDate = toDate
                     };
-                    IList<LogRecord> logs = api.Call<IList<LogRecord>>("Get", typeof(LogRecord), new { search = logRecordSearch });
+                    IList<LogRecord> logs = await api.CallAsync<IList<LogRecord>>("Get", typeof(LogRecord), new { search = logRecordSearch });
 
                     // Use a string builder for the results and limit the amount of data entered into the text box.
                     StringBuilder stringBuilder = new StringBuilder(10000);

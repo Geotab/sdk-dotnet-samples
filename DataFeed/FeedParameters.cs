@@ -5,7 +5,7 @@ using Geotab.Checkmate.ObjectModel.Exceptions;
 namespace Geotab.SDK.DataFeed
 {
     /// <summary>
-    /// Contains latest data tokens and collections to populate during <see cref="FeedProcessor.Get"/> call.
+    /// Contains latest data tokens and collections to populate during <see cref="FeedProcessor.GetAsync"/> call.
     /// </summary>
     class FeedParameters
     {

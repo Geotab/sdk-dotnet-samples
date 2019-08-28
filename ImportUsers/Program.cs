@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
@@ -114,7 +115,7 @@ namespace Geotab.SDK.ImportUsers
 
                         DateTime maxValue = System.TimeZoneInfo.ConvertTimeToUtc(DateTime.MaxValue);
                         DateTime minValue = DateTime.MinValue;
-                        var user = User.CreateBasicUser(null, userName, firstName, lastName, password, null, null, null, minValue, maxValue, null, null, null, null);
+                        var user = User.CreateBasicUser(null, null, userName, firstName, lastName, password, null, null, null, minValue, maxValue, null, null, null, null);
                         userDetails.Add(new UserDetails(user, organizationNodes, securityNodes));
                     }
                     catch (Exception exception)
@@ -137,7 +138,7 @@ namespace Geotab.SDK.ImportUsers
         /// A complete Geotab API object and method reference is available at the Geotab Developer page.
         /// </summary>
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project &gt; Properties &gt; Debug Tab &gt; Start Options: Command line arguments.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -182,14 +183,14 @@ namespace Geotab.SDK.ImportUsers
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
-                api.Authenticate();
+                await api.AuthenticateAsync();
 
                 // Start import
                 Console.WriteLine("Importing users...");
 
-                IList<User> existingUsers = api.Call<List<User>>("Get", typeof(User)) ?? new List<User>();
-                IList<Group> allGroups = api.Call<IList<Group>>("Get", typeof(Group)) ?? new List<Group>();
-                IList<Group> securityGroups = api.Call<IList<Group>>("Get", typeof(Group), new { search = new GroupSearch(new SecurityGroup().Id) }) ?? new List<Group>();
+                IList<User> existingUsers = await api.CallAsync<List<User>>("Get", typeof(User)) ?? new List<User>();
+                IList<Group> allGroups = await api.CallAsync<IList<Group>>("Get", typeof(Group)) ?? new List<Group>();
+                IList<Group> securityGroups = await api.CallAsync<IList<Group>>("Get", typeof(Group), new { search = new GroupSearch(new SecurityGroup().Id) }) ?? new List<Group>();
                 foreach (UserDetails userDetail in userDetails)
                 {
                     // Add groups to user
@@ -202,7 +203,7 @@ namespace Geotab.SDK.ImportUsers
                         try
                         {
                             // Add the user
-                            api.Call<Id>("Add", typeof(User), new { entity = user });
+                            await api.CallAsync<Id>("Add", typeof(User), new { entity = user });
                             Console.WriteLine($"User: '{user.Name}' added");
                             existingUsers.Add(user);
                         }

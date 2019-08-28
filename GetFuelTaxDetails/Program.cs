@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Geotab.Checkmate.ObjectModel.Fuel;
@@ -14,7 +15,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
         /// </summary>
         const long HourTicks = TimeSpan.TicksPerHour;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -62,7 +63,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
 
                 // The example code will retrieve fuel tax details for one device at a time. For smaller fleets, it is feasible to retrieve the details for all devices by removing the device search from the search object below.
                 Console.WriteLine("Retrieving devices...");
-                IList<Device> devices = api.Call<IList<Device>>("Get", typeof(Device));
+                IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device));
 
                 // Get the fuel tax details restricted to the time interval, grouped by device, and sorted by enter time.
                 Console.WriteLine("Retrieving fuel tax details...");
@@ -78,7 +79,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                         IncludeHourlyData = false,
                         IncludeBoundaries = false
                     };
-                    List<FuelTaxDetail> deviceDetails = api.Call<IList<FuelTaxDetail>>("Get", typeof(FuelTaxDetail), new { search = fuelTaxDetailSearch }).ToList();
+                    List<FuelTaxDetail> deviceDetails = (await api.CallAsync<IList<FuelTaxDetail>>("Get", typeof(FuelTaxDetail), new { search = fuelTaxDetailSearch })).ToList();
                     if (deviceDetails.Count > 0)
                     {
                         // Group successive details depending on the options.
@@ -89,7 +90,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                         {
                             if (device is GoDevice)
                             {
-                                var deviceFuelUsage = GetFuelUsageByJurisdiction(api, device as GoDevice, deviceDetails);
+                                var deviceFuelUsage = await GetFuelUsageByJurisdictionAsync(api, device as GoDevice, deviceDetails);
                                 fuelUsageByDevice[device] = deviceFuelUsage;
                             }
                         }
@@ -211,7 +212,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
         /// <param name="device">The device.</param>
         /// <param name="details">The fuel tax details.</param>
         /// <returns>A list of fuel tax data objects.</returns>
-        static Dictionary<string, Dictionary<FuelType, FuelUsage>> GetFuelUsageByJurisdiction(API api, GoDevice device, IList<FuelTaxDetail> details)
+        static async Task<Dictionary<string, Dictionary<FuelType, FuelUsage>>> GetFuelUsageByJurisdictionAsync(API api, GoDevice device, IList<FuelTaxDetail> details)
         {
             var fuelUsageByJurisdiction = new Dictionary<string, Dictionary<FuelType, FuelUsage>>();
 
@@ -226,7 +227,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 FromDate = fromDate,
                 ToDate = toDate
             };
-            List<FuelTransaction> fuelTransactions = api.Call<IList<FuelTransaction>>("Get", typeof(FuelTransaction), new { search = fuelTransactionSearch }).ToList();
+            List<FuelTransaction> fuelTransactions = (await api.CallAsync<IList<FuelTransaction>>("Get", typeof(FuelTransaction), new { search = fuelTransactionSearch })).ToList();
             fuelTransactions.Sort((transaction1, transaction2) => DateTime.Compare(transaction1.DateTime.Value, transaction2.DateTime.Value));
 
             // Calculate total purchased fuel by fuel type and jurisdiction.

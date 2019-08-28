@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
@@ -100,7 +101,7 @@ namespace Geotab.SDK.ImportDevices
         /// A complete Geotab API object and method reference is available at the Geotab Developer page.
         /// </summary>
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project &gt; Properties &gt; Debug Tab &gt; Start Options: Command line arguments.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -145,22 +146,22 @@ namespace Geotab.SDK.ImportDevices
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
-                api.Authenticate();
+                await api.AuthenticateAsync();
 
                 // Get user
-                User apiUser = api.Call<List<User>>("Get", typeof(User), new
+                User apiUser = (await api.CallAsync<List<User>>("Get", typeof(User), new
                 {
                     search = new UserSearch
                     {
                         Name = username
                     }
-                })[0];
+                }))[0];
 
                 // Start import
                 Console.WriteLine("Importing...");
 
-                IList<Device> existingDevices = api.Call<IList<Device>>("Get", typeof(Device)) ?? new List<Device>();
-                IList<Group> groups = api.Call<IList<Group>>("Get", typeof(Group));
+                IList<Device> existingDevices = await api.CallAsync<IList<Device>>("Get", typeof(Device)) ?? new List<Device>();
+                IList<Group> groups = await api.CallAsync<IList<Group>>("Get", typeof(Group));
 
                 // We only want to be able to assign Organization Group if the API user has this in their scope.
                 bool hasOrgGroupScope = false;
@@ -238,7 +239,7 @@ namespace Geotab.SDK.ImportDevices
                         newDevice.WorkTime = new WorkTimeStandardHours();
 
                         // Add the device.
-                        api.Call<Id>("Add", typeof(Device), new { entity = newDevice });
+                        await api.CallAsync<Id>("Add", typeof(Device), new { entity = newDevice });
                         Console.WriteLine($"Device: '{device.Description}' added");
                     }
                     catch (Exception ex)

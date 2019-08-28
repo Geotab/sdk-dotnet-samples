@@ -1,4 +1,5 @@
-﻿using Thread = System.Threading.Thread;
+﻿using System.Threading.Tasks;
+using Thread = System.Threading.Thread;
 
 namespace Geotab.SDK.DataFeed
 {
@@ -23,7 +24,7 @@ namespace Geotab.SDK.DataFeed
         /// Displays the feed results.
         /// </summary>
         /// <param name="results">The results.</param>
-        public void DisplayFeedResults(FeedResultData results)
+        public async Task DisplayFeedResultsAsync(FeedResultData results)
         {
             // Output to console
             // new FeedToConsole(results.GpsRecords, results.StatusData, results.FaultData).Run();
@@ -31,19 +32,18 @@ namespace Geotab.SDK.DataFeed
             new FeedToCsv(path, results.GpsRecords, results.StatusData, results.FaultData, results.Trips, results.ExceptionEvents).Run();
 
             // new FeedToBigquery(path).Run();
-            Thread.Sleep(1000);
+            await Task.Delay(1000);
         }
 
         /// <summary>
         /// Do the work.
         /// </summary>
         /// <param name="obj">The object.</param>
-        public void DoWork(object obj)
+        public async Task DoWorkAsync(bool continuous)
         {
-            bool continuous = (bool)obj;
             do
             {
-                WorkAction();
+                await WorkActionAsync();
             }
             while (continuous && !stop);
         }
@@ -59,6 +59,6 @@ namespace Geotab.SDK.DataFeed
         /// <summary>
         /// The work action.
         /// </summary>
-        public abstract void WorkAction();
+        public abstract Task WorkActionAsync();
     }
 }

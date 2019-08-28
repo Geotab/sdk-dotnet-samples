@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Geotab.Checkmate.ObjectModel.Engine;
@@ -45,7 +46,6 @@ namespace Geotab.SDK.DataFeed
         public FeedProcessor(API api)
         {
             this.api = api;
-            api.Authenticate();
         }
 
         /// <summary>
@@ -53,60 +53,60 @@ namespace Geotab.SDK.DataFeed
         /// </summary>
         /// <param name="feedParams">Contains latest data token and collections to populate during this call.</param>
         /// <returns><see cref="FeedResultData"/></returns>
-        public FeedResultData Get(FeedParameters feedParams)
+        public async Task<FeedResultData> GetAsync(FeedParameters feedParams)
         {
             FeedResultData feedResults = new FeedResultData(new List<LogRecord>(), new List<StatusData>(), new List<FaultData>(), new List<Trip>(), new List<ExceptionEvent>());
             try
             {
                 if (DateTime.UtcNow > repopulateCaches)
                 {
-                    PopulateCaches();
+                    await PopulateCachesAsync();
                     repopulateCaches = DateTime.UtcNow.AddHours(RepopulatePeroid);
                 }
-                FeedResult<LogRecord> feedLogRecordData = MakeFeedCall<LogRecord>(feedParams.LastGpsDataToken);
-                FeedResult<StatusData> feedStatusData = MakeFeedCall<StatusData>(feedParams.LastStatusDataToken);
-                FeedResult<FaultData> feedFaultData = MakeFeedCall<FaultData>(feedParams.LastFaultDataToken);
-                FeedResult<Trip> feedTripData = MakeFeedCall<Trip>(feedParams.LastTripToken);
-                FeedResult<ExceptionEvent> feedExceptionData = MakeFeedCall<ExceptionEvent>(feedParams.LastExceptionToken);
+                FeedResult<LogRecord> feedLogRecordData = await MakeFeedCallAsync<LogRecord>(feedParams.LastGpsDataToken);
+                FeedResult<StatusData> feedStatusData = await MakeFeedCallAsync<StatusData>(feedParams.LastStatusDataToken);
+                FeedResult<FaultData> feedFaultData = await MakeFeedCallAsync<FaultData>(feedParams.LastFaultDataToken);
+                FeedResult<Trip> feedTripData = await MakeFeedCallAsync<Trip>(feedParams.LastTripToken);
+                FeedResult<ExceptionEvent> feedExceptionData = await MakeFeedCallAsync<ExceptionEvent>(feedParams.LastExceptionToken);
                 feedParams.LastGpsDataToken = feedLogRecordData.ToVersion;
                 foreach (LogRecord log in feedLogRecordData.Data)
                 {
                     // Populate relevant LogRecord fields.
-                    log.Device = GetDevice(log.Device);
+                    log.Device = await GetDeviceAsync(log.Device);
                     feedResults.GpsRecords.Add(log);
                 }
                 feedParams.LastStatusDataToken = feedStatusData.ToVersion;
                 foreach (StatusData log in feedStatusData.Data)
                 {
                     // Populate relevant StatusData fields.
-                    log.Device = GetDevice(log.Device);
-                    log.Diagnostic = GetDiagnostic(log.Diagnostic);
+                    log.Device = await GetDeviceAsync(log.Device);
+                    log.Diagnostic = await GetDiagnosticAsync(log.Diagnostic);
                     feedResults.StatusData.Add(log);
                 }
                 feedParams.LastFaultDataToken = feedFaultData.ToVersion;
                 foreach (FaultData log in feedFaultData.Data)
                 {
                     // Populate relevant FaultData fields.
-                    log.Device = GetDevice(log.Device);
-                    log.Diagnostic = GetDiagnostic(log.Diagnostic);
-                    log.Controller = GetController(log.Controller);
-                    log.FailureMode = GetFailureMode(log.FailureMode);
+                    log.Device = await GetDeviceAsync(log.Device);
+                    log.Diagnostic = await GetDiagnosticAsync(log.Diagnostic);
+                    log.Controller = await GetControllerAsync(log.Controller);
+                    log.FailureMode = await GetFailureModeAsync(log.FailureMode);
                     feedResults.FaultData.Add(log);
                 }
                 feedParams.LastTripToken = feedTripData.ToVersion;
                 foreach (Trip trip in feedTripData.Data)
                 {
-                    trip.Device = GetDevice(trip.Device);
-                    trip.Driver = GetDriver(trip.Driver);
+                    trip.Device = await GetDeviceAsync(trip.Device);
+                    trip.Driver = await GetDriver(trip.Driver);
                     feedResults.Trips.Add(trip);
                 }
                 feedParams.LastExceptionToken = feedExceptionData.ToVersion;
                 foreach (ExceptionEvent exceptionEvent in feedExceptionData.Data)
                 {
-                    exceptionEvent.Device = GetDevice(exceptionEvent.Device);
-                    exceptionEvent.Driver = GetDriver(exceptionEvent.Driver);
-                    exceptionEvent.Diagnostic = GetDiagnostic(exceptionEvent.Diagnostic);
-                    exceptionEvent.Rule = GetRule(exceptionEvent.Rule);
+                    exceptionEvent.Device = await GetDeviceAsync(exceptionEvent.Device);
+                    exceptionEvent.Driver = await GetDriver(exceptionEvent.Driver);
+                    exceptionEvent.Diagnostic = await GetDiagnosticAsync(exceptionEvent.Diagnostic);
+                    exceptionEvent.Rule = await GetRuleAsync(exceptionEvent.Rule);
                     feedResults.ExceptionEvents.Add(exceptionEvent);
                 }
             }
@@ -115,20 +115,20 @@ namespace Geotab.SDK.DataFeed
                 Console.WriteLine(e.Message);
                 if (e is HttpRequestException)
                 {
-                    Thread.Sleep(5000);
+                    await Task.Delay(5000);
                 }
                 if (e is DbUnavailableException)
                 {
-                    Thread.Sleep(TimeSpan.FromMinutes(5));
+                    await Task.Delay(TimeSpan.FromMinutes(5));
                 }
             }
             return feedResults;
         }
 
-        IDictionary<Id, T> GetCache<T>()
+        async Task<IDictionary<Id, T>> GetCacheAsync<T>()
             where T : Entity
         {
-            IList<T> items = api.Call<IList<T>>("Get", typeof(T));
+            IList<T> items = await api.CallAsync<IList<T>>("Get", typeof(T));
             if (items != null)
             {
                 Dictionary<Id, T> cache = new Dictionary<Id, T>(items.Count);
@@ -146,7 +146,7 @@ namespace Geotab.SDK.DataFeed
         /// </summary>
         /// <param name="controller">The <see cref="Controller"/> to populate.</param>
         /// <returns>populated controller</returns>
-        Controller GetController(Controller controller)
+        async Task<Controller> GetControllerAsync(Controller controller)
         {
             if (controller == null || controller is NoController)
             {
@@ -157,7 +157,7 @@ namespace Geotab.SDK.DataFeed
             {
                 return controller;
             }
-            IList<Controller> returnedController = api.Call<IList<Controller>>("Get", typeof(Controller), new { search = new ControllerSearch(id) });
+            IList<Controller> returnedController = await api.CallAsync<IList<Controller>>("Get", typeof(Controller), new { search = new ControllerSearch(id) });
             if (returnedController.Count == 0)
             {
                 return null;
@@ -172,7 +172,7 @@ namespace Geotab.SDK.DataFeed
         /// </summary>
         /// <param name="device">The <see cref="Device"/> to populate.</param>
         /// <returns>populated device</returns>
-        Device GetDevice(Device device)
+        async Task<Device> GetDeviceAsync(Device device)
         {
             if (device == null || device is NoDevice)
             {
@@ -183,7 +183,7 @@ namespace Geotab.SDK.DataFeed
             {
                 return device;
             }
-            IList<Device> returnedDevices = api.Call<IList<Device>>("Get", typeof(Device), new { search = new DeviceSearch(id) });
+            IList<Device> returnedDevices = await api.CallAsync<IList<Device>>("Get", typeof(Device), new { search = new DeviceSearch(id) });
             if (returnedDevices.Count == 0)
             {
                 return null;
@@ -200,7 +200,7 @@ namespace Geotab.SDK.DataFeed
         /// <returns>
         /// Populated diagnostic.
         /// </returns>
-        Diagnostic GetDiagnostic(Diagnostic diagnostic)
+        async Task<Diagnostic> GetDiagnosticAsync(Diagnostic diagnostic)
         {
             if (diagnostic == null || diagnostic is NoDiagnostic)
             {
@@ -211,7 +211,7 @@ namespace Geotab.SDK.DataFeed
             {
                 return diagnostic;
             }
-            IList<Diagnostic> returnedDiagnostic = api.Call<IList<Diagnostic>>("Get", typeof(Diagnostic), new { search = new DiagnosticSearch(id) });
+            IList<Diagnostic> returnedDiagnostic = await api.CallAsync<IList<Diagnostic>>("Get", typeof(Diagnostic), new { search = new DiagnosticSearch(id) });
             if (returnedDiagnostic.Count == 0)
             {
                 return null;
@@ -221,9 +221,9 @@ namespace Geotab.SDK.DataFeed
             return diagnostic;
         }
 
-        IDictionary<Id, Diagnostic> GetDiagnosticCache()
+        async Task<IDictionary<Id, Diagnostic>> GetDiagnosticCacheAsync()
         {
-            IDictionary<Id, Diagnostic> cache = GetCache<Diagnostic>();
+            IDictionary<Id, Diagnostic> cache = await GetCacheAsync<Diagnostic>();
             if (cache.Keys.Count > 0)
             {
                 foreach (Diagnostic diagnostic in cache.Values)
@@ -252,7 +252,7 @@ namespace Geotab.SDK.DataFeed
         /// </summary>
         /// <param name="driver">The driver.</param>
         /// <returns>a populated driver</returns>
-        Driver GetDriver(Driver driver)
+        async Task<Driver> GetDriver(Driver driver)
         {
             if (driver == null || driver is NoDriver)
             {
@@ -271,7 +271,7 @@ namespace Geotab.SDK.DataFeed
             {
                 IsDriver = true
             };
-            IList<User> returnedDriver = api.Call<List<User>>("Get", typeof(User), new { search = userSearch });
+            IList<User> returnedDriver = await api.CallAsync<List<User>>("Get", typeof(User), new { search = userSearch });
             if (returnedDriver.Count == 0)
             {
                 return null;
@@ -281,14 +281,14 @@ namespace Geotab.SDK.DataFeed
             return driver;
         }
 
-        IDictionary<Id, Driver> GetDriverCache()
+        async Task<IDictionary<Id, Driver>> GetDriverCacheAsync()
         {
             UserSearch userSearch =
             new UserSearch
             {
                 IsDriver = true
             };
-            IList<User> drivers = api.Call<List<User>>("Get", typeof(User), new { search = userSearch });
+            IList<User> drivers = await api.CallAsync<List<User>>("Get", typeof(User), new { search = userSearch });
             if (drivers != null)
             {
                 Dictionary<Id, Driver> cache = new Dictionary<Id, Driver>(drivers.Count);
@@ -307,7 +307,7 @@ namespace Geotab.SDK.DataFeed
         /// </summary>
         /// <param name="failureMode">The <see cref="FailureMode"/> to populate.</param>
         /// <returns>populated failure mode</returns>
-        FailureMode GetFailureMode(FailureMode failureMode)
+        async Task<FailureMode> GetFailureModeAsync(FailureMode failureMode)
         {
             if (failureMode == null || failureMode is NoFailureMode)
             {
@@ -318,7 +318,7 @@ namespace Geotab.SDK.DataFeed
             {
                 return failureMode;
             }
-            IList<FailureMode> returnedFailureMode = api.Call<IList<FailureMode>>("Get", typeof(FailureMode), new { search = new FailureModeSearch(id) });
+            IList<FailureMode> returnedFailureMode = await api.CallAsync<IList<FailureMode>>("Get", typeof(FailureMode), new { search = new FailureModeSearch(id) });
             if (returnedFailureMode.Count == 0)
             {
                 return null;
@@ -328,7 +328,7 @@ namespace Geotab.SDK.DataFeed
             return failureMode;
         }
 
-        Rule GetRule(Rule rule)
+        async Task<Rule> GetRuleAsync(Rule rule)
         {
             if (rule == null)
             {
@@ -339,7 +339,7 @@ namespace Geotab.SDK.DataFeed
             {
                 return rule;
             }
-            IList<Rule> returnedRule = api.Call<IList<Rule>>("Get", typeof(Rule), new { search = new RuleSearch(id) });
+            IList<Rule> returnedRule = await api.CallAsync<IList<Rule>>("Get", typeof(Rule), new { search = new RuleSearch(id) });
             if (returnedRule.Count == 0)
             {
                 return null;
@@ -349,18 +349,18 @@ namespace Geotab.SDK.DataFeed
             return rule;
         }
 
-        FeedResult<T> MakeFeedCall<T>(long? fromVersion)
-                                                                                    where T : Entity => api.Call<FeedResult<T>>("GetFeed", typeof(T), new { fromVersion });
+        async Task<FeedResult<T>> MakeFeedCallAsync<T>(long? fromVersion)
+            where T : Entity => await api.CallAsync<FeedResult<T>>("GetFeed", typeof(T), new { fromVersion });
 
-        void PopulateCaches()
+        async Task PopulateCachesAsync()
         {
-            controllerCache = GetCache<Controller>();
-            unitOfMeasureCache = GetCache<UnitOfMeasure>();
-            diagnosticCache = GetDiagnosticCache();
-            failureModeCache = GetCache<FailureMode>();
-            deviceCache = GetCache<Device>();
-            driverCache = GetDriverCache();
-            ruleCache = GetCache<Rule>();
+            controllerCache = await GetCacheAsync<Controller>();
+            unitOfMeasureCache = await GetCacheAsync<UnitOfMeasure>();
+            diagnosticCache = await GetDiagnosticCacheAsync();
+            failureModeCache = await GetCacheAsync<FailureMode>();
+            deviceCache = await GetCacheAsync<Device>();
+            driverCache = await GetDriverCacheAsync();
+            ruleCache = await GetCacheAsync<Rule>();
         }
     }
 }

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Thread = System.Threading.Thread;
 
 namespace Geotab.SDK.DataFeed
@@ -60,13 +62,13 @@ namespace Geotab.SDK.DataFeed
                                 bool continuous = arguments.IndexOf("--c") >= 0;
                                 bool federation = string.IsNullOrEmpty(database);
                                 Worker worker = new DatabaseWorker(user, password, database, server, gpsToken, statusToken, faultToken, tripToken, exceptionToken, path);
-                                Thread thread = new Thread(worker.DoWork);
-                                thread.Start(continuous);
+                                var cancellationToken = new CancellationTokenSource();
+                                Task task = Task.Run(async () => await worker.DoWorkAsync(continuous), cancellationToken.Token);
                                 if (continuous && Console.ReadLine() != null)
                                 {
                                     worker.RequestStop();
+                                    cancellationToken.Cancel();
                                 }
-                                thread.Join();
                                 Console.WriteLine();
                                 Console.WriteLine("******************************************************");
                                 Console.WriteLine("Finished receiving data from " + server + (federation ? "" : "/" + database));

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
@@ -151,10 +152,10 @@ namespace Geotab.SDK.ImportGroupsR
         }
 
         /// <inheritdoc/>
-        public List<Group> Parse(Stream stream)
+        public async Task<List<Group>> ParseAsync(Stream stream)
         {
             // All groups under the Company Group with name *Org* are returned, with the Company Group itself being the first in list
-            groupListFromDb = checkmateApi.Call<IList<Group>>("Get", typeof(Group)) ?? new List<Group>();
+            groupListFromDb = await checkmateApi.CallAsync<IList<Group>>("Get", typeof(Group)) ?? new List<Group>();
 
             GroupLookupFromDB = CreateDictionary(groupListFromDb, g => g.Reference, out groupsInDbWithNonUniqueReferenceLookup);
             groupLookupByIdFromDb = CreateDictionary(groupListFromDb, g => g.Id, out IDictionary<Id, IList<Group>> groupsWithNonUniqueIdLookup);
@@ -248,6 +249,7 @@ namespace Geotab.SDK.ImportGroupsR
                 else if (GroupLookupFromDB.TryGetValue(rootGroupSreference, out rootGroupFromDb))
                 {
                     rootGroupParsed = (Group)rootGroupFromDb.Clone();
+                    rootGroupParsed.Children.Clear();
                 }
                 else
                 {
@@ -264,6 +266,7 @@ namespace Geotab.SDK.ImportGroupsR
                     throw new InvalidDataException($"Terminate, first line parent group with sReference '{parentSreference}' does not exist in the Node table in the database");
                 }
                 FirstLineParentGroupParsed = (Group)firstLineParentGroupFromDb.Clone();
+                FirstLineParentGroupParsed.Children.Clear();
 
                 if (groupsInDbWithNonUniqueReferenceLookup != null && groupsInDbWithNonUniqueReferenceLookup.TryGetValue(firstLineParentSreference, out IList<Group> nonUniqueGroups)
                     && nonUniqueGroups != null && nonUniqueGroups.Count > 0)
@@ -286,7 +289,7 @@ namespace Geotab.SDK.ImportGroupsR
             }
 
             // Link parsed group into the group tree
-            childGroup = new Group(null, parentGroup, childName, childDescription, childSreference, new Drawing.Color(childColor, false));
+            childGroup = Group.Get(null, parentGroup, childName, childDescription, null, null, childSreference, new Drawing.Color(childColor, false));
             GroupLookupParsed.Add(childSreference, childGroup);
             parentGroup.Children.Add(childGroup);
 

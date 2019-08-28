@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Geotab.Checkmate.ObjectModel.Exceptions;
@@ -116,12 +117,12 @@ namespace Geotab.SDK.ImportGroupsR
         /// <summary>
         /// Determines how each parsed group needs to be imported, what groups to delete from DB and imports the groups.
         /// </summary>
-        public void DetermineDispositionAndImportGroups()
+        public async Task DetermineDispositionAndImportGroupsAsync()
         {
             DetermineGroupImportStatusForParsedGroups();
             var groupTreesToDelete = DetermineGroupDeleteStatusForGroupsFromDB();
-            ImportParsedGroups();
-            DeleteGroupsFromDB(groupTreesToDelete);
+            await ImportParsedGroupsAsync();
+            await DeleteGroupsFromDBAsync(groupTreesToDelete);
         }
 
         /// <summary>
@@ -320,7 +321,7 @@ namespace Geotab.SDK.ImportGroupsR
                             && groupParsed.Comments.Equals(groupFromDB.Comments, StringComparison.CurrentCultureIgnoreCase);
         }
 
-        void DeleteGroupsFromDB(IReadOnlyCollection<Group> groupTreesToDelete)
+        async Task DeleteGroupsFromDBAsync(IReadOnlyCollection<Group> groupTreesToDelete)
         {
             var groupDeleteIterator = new GroupPostOrderIterator(groupTreesToDelete, importStatusLookup);
             foreach (var group in groupDeleteIterator)
@@ -331,7 +332,7 @@ namespace Geotab.SDK.ImportGroupsR
                     var status = EntityImportStatus.DeletionCandidate;
                     if (deleteEmptyGroups)
                     {
-                        api.Call<object>("Remove", typeof(Group), new { entity = group });
+                        await api.CallAsync<object>("Remove", typeof(Group), new { entity = group });
                         status = EntityImportStatus.Deleted;
                     }
                     OnEntityImported(new EntityImportedEventArgs<GroupWithLoggingData>(groupParsedWithOldParentData, status));
@@ -345,7 +346,7 @@ namespace Geotab.SDK.ImportGroupsR
                     }
                     else
                     {
-                        PopulateRelations(groupRelationViolatedException.Relations);
+                        await PopulateRelationsAsync(groupRelationViolatedException.Relations);
                         var groupParsedWithOldParentData = GetGroupWithParentData(group, false, groupRelationViolatedException.Relations);
                         if (moveAssetsUp)
                         {
@@ -491,7 +492,7 @@ namespace Geotab.SDK.ImportGroupsR
             throw new InvalidOperationException($"Group with Sreference {group.Reference} is not in lookupFromDB");
         }
 
-        void ImportParsedGroups()
+        async Task ImportParsedGroupsAsync()
         {
             var groupIterator = new GroupBreadthFirstIterator(firstLineParentGroupParsed);
             var iterationCount = 0;
@@ -516,13 +517,13 @@ namespace Geotab.SDK.ImportGroupsR
                             break;
 
                         case EntityImportStatus.Added:
-                            groupParsed.Id = api.Call<Id>("Add", typeof(Group), new { entity = groupParsed });
+                            groupParsed.Id = await api.CallAsync<Id>("Add", typeof(Group), new { entity = groupParsed });
                             break;
 
                         case EntityImportStatus.Updated:
                         case EntityImportStatus.MovedExisting:
                         case EntityImportStatus.MovedUpdated:
-                            api.Call<object>("Set", typeof(Group), new { entity = groupParsed });
+                            await api.CallAsync<object>("Set", typeof(Group), new { entity = groupParsed });
                             groupParsedWithOldParentData = GetGroupWithParentData(groupParsed, true);
                             break;
 
@@ -544,7 +545,7 @@ namespace Geotab.SDK.ImportGroupsR
             throw new NotSupportedException($"{nameof(MoveAssetsUp)} not yet implemented, cannot use flag -m");
         }
 
-        void PopulateEntitiesFromDB<TEntity, TEntitySearch>(IList<TEntity> entities)
+        async Task PopulateEntitiesFromDBAsync<TEntity, TEntitySearch>(IList<TEntity> entities)
                 where TEntity : Entity
         where TEntitySearch : Search, new()
         {
@@ -571,7 +572,7 @@ namespace Geotab.SDK.ImportGroupsR
                     };
                     calls.Add(new object[] { "Get", typeof(TEntity), new { search = entitySearch }, typeof(List<TEntity>) });
                 }
-                var results = api.MultiCall(calls.ToArray());
+                var results = await api.MultiCallAsync(calls.ToArray());
                 for (var i = 0; i < results?.Count; i++)
                 {
                     if (results[i] is List<TEntity> entitiesFromDB && entitiesFromDB.Count > 0)
@@ -590,7 +591,7 @@ namespace Geotab.SDK.ImportGroupsR
             }
         }
 
-        bool PopulateNameEntitiesFromDB<TAsset, TAssetSearch>(IList<TAsset> nameEntity)
+        async Task<bool> PopulateNameEntitiesFromDBAsync<TAsset, TAssetSearch>(IList<TAsset> nameEntity)
             where TAsset : NameEntity
             where TAssetSearch : Search, new()
         {
@@ -609,7 +610,7 @@ namespace Geotab.SDK.ImportGroupsR
                     };
                     calls.Add(new object[] { "Get", typeof(TAsset), new { search = nameEntitySearch }, typeof(List<TAsset>) });
                 }
-                var results = api.MultiCall(calls.ToArray());
+                var results = await api.MultiCallAsync(calls.ToArray());
                 for (var i = 0; i < results?.Count; i++)
                 {
                     if (results[i] is List<TAsset> nameEntitiesFromDB && nameEntitiesFromDB.Count > 0)
@@ -629,7 +630,7 @@ namespace Geotab.SDK.ImportGroupsR
         }
 
         //void PopulateNestedEntitiesFromDB<TParent, TParentSearch, TChild, TChildSearch>(IList<TParent> parentEntities, Func<TParent, TChild> navigationProperty)
-        void PopulateNestedEntitiesFromDB<TParent, TParentSearch, TChild, TChildSearch>(IList<TParent> parentEntities, string childPropertyName)
+        async Task PopulateNestedEntitiesFromDBAsync<TParent, TParentSearch, TChild, TChildSearch>(IList<TParent> parentEntities, string childPropertyName)
             where TParent : Entity
             where TParentSearch : Search, new()
             where TChild : Entity
@@ -640,7 +641,7 @@ namespace Geotab.SDK.ImportGroupsR
                 return;
             }
 
-            PopulateEntitiesFromDB<TParent, TParentSearch>(parentEntities);
+            await PopulateEntitiesFromDBAsync<TParent, TParentSearch>(parentEntities);
             var childProperty = typeof(TParent).GetProperty(childPropertyName);
             var childPropertyGet = childProperty.GetGetMethod();
             var childPropertySet = childProperty.GetSetMethod();
@@ -650,23 +651,23 @@ namespace Geotab.SDK.ImportGroupsR
                 //childEntities.Add(navigationProperty.Invoke(parentEntities[i]));
                 childEntities.Add((TChild)childPropertyGet.Invoke(parentEntity, null));
             }
-            PopulateEntitiesFromDB<TChild, TChildSearch>(childEntities);
+            await PopulateEntitiesFromDBAsync<TChild, TChildSearch>(childEntities);
             for (var i = 0; i < childEntities.Count; i++)
             {
                 childPropertySet.Invoke(parentEntities[i], new[] { childEntities[i] });
             }
         }
 
-        void PopulateRelations(GroupRelations relations)
+        async Task PopulateRelationsAsync(GroupRelations relations)
         {
-            PopulateNameEntitiesFromDB<Zone, ZoneSearch>(relations.Zones);
-            PopulateNameEntitiesFromDB<Device, DeviceSearch>(relations.Devices);
-            PopulateNameEntitiesFromDB<User, UserSearch>(relations.Users);
-            PopulateNameEntitiesFromDB<Rule, RuleSearch>(relations.Rules);
+            await PopulateNameEntitiesFromDBAsync<Zone, ZoneSearch>(relations.Zones);
+            await PopulateNameEntitiesFromDBAsync<Device, DeviceSearch>(relations.Devices);
+            await PopulateNameEntitiesFromDBAsync<User, UserSearch>(relations.Users);
+            await PopulateNameEntitiesFromDBAsync<Rule, RuleSearch>(relations.Rules);
 
             // relation.Drivers is of List<User> type
-            PopulateNameEntitiesFromDB<User, UserSearch>(relations.Drivers);
-            PopulateNestedEntitiesFromDB<CustomReportSchedule, Search, ReportTemplate, Search>(relations.CustomReportSchedules, nameof(CustomReportSchedule.Template));
+            await PopulateNameEntitiesFromDBAsync<User, UserSearch>(relations.Drivers);
+            await PopulateNestedEntitiesFromDBAsync<CustomReportSchedule, Search, ReportTemplate, Search>(relations.CustomReportSchedules, nameof(CustomReportSchedule.Template));
 
             //TODO: more assets
         }
