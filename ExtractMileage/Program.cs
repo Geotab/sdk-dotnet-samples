@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
@@ -26,7 +27,7 @@ namespace Geotab.SDK.ExtractMileage
         /// A complete Geotab API object and method reference is available at the Geotab Developer page.
         /// </summary>
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project > Properties > Debug Tab > Start Options: Command line arguments.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -71,7 +72,7 @@ namespace Geotab.SDK.ExtractMileage
 
                 // Make API call for all devices
                 Console.WriteLine(" Retrieving devices...");
-                var devices = api.Call<IList<Device>>("Get", typeof(Device));
+                var devices = await api.CallAsync<IList<Device>>("Get", typeof(Device));
 
                 // The list of all vehicle vehicle readings
                 var odometerReadings = new List<VehicleWithMileage>(devices.Count);
@@ -92,7 +93,7 @@ namespace Geotab.SDK.ExtractMileage
                     };
 
                     // Retrieve the odometer status data
-                    IList<StatusData> statusData = api.Call<IList<StatusData>>("Get", typeof(StatusData), new { search = statusDataSearch });
+                    IList<StatusData> statusData = await api.CallAsync<IList<StatusData>>("Get", typeof(StatusData), new { search = statusDataSearch });
 
                     var odometerReading = statusData[0].Data ?? 0;
                     odometerReadings.Add(new VehicleWithMileage(device, odometerReading));

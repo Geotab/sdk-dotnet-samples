@@ -10,7 +10,7 @@
     <RootNamespace>Geotab.SDK.DataFeed</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1901" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1903" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotNetOpenAuth">

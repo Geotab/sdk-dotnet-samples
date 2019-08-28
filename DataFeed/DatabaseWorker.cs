@@ -1,4 +1,6 @@
-﻿namespace Geotab.SDK.DataFeed
+﻿using System.Threading.Tasks;
+
+namespace Geotab.SDK.DataFeed
 {
     /// <summary>
     /// Worker for a database
@@ -32,9 +34,9 @@
         /// The work action.
         /// </summary>
         /// <inheritdoc />
-        public override void WorkAction()
+        public async override Task WorkActionAsync()
         {
-            DisplayFeedResults(feedService.Get(feedParameters));
+            await DisplayFeedResultsAsync(await feedService.GetAsync(feedParameters));
         }
     }
 }

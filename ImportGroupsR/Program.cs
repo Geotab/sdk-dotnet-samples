@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
@@ -26,9 +27,13 @@ namespace Geotab.SDK.ImportGroupsR
             sw = null;
         }
 
-        static List<Group> ExtractGroupsFromInputFile(API api, string fileName, out Group firstLineParentGroupParsed, out Group firstLineParentGroupFromDB, out IDictionary<string, Group> groupLookupFromDB, out IDictionary<string, Group> groupLookupParsed)
+        static async Task<(List<Group>, Group, Group, IDictionary<string, Group>, IDictionary<string, Group>)> ExtractGroupsFromInputFile(API api, string fileName)
         {
             List<Group> groups;
+            Group firstLineParentGroupParsed;
+            Group firstLineParentGroupFromDB;
+            IDictionary<string, Group> groupLookupFromDB;
+            IDictionary<string, Group> groupLookupParsed;
             try
             {
                 var parser = new ImportGroupParser(api, rootGroupSreference);
@@ -36,7 +41,7 @@ namespace Geotab.SDK.ImportGroupsR
 
                 using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    groups = parser.Parse(stream);
+                    groups = await parser.ParseAsync(stream);
                 }
                 firstLineParentGroupParsed = parser.FirstLineParentGroupParsed;
                 firstLineParentGroupFromDB = parser.FirstLineParentGroupFromDB;
@@ -48,7 +53,7 @@ namespace Geotab.SDK.ImportGroupsR
                 Console.WriteLine("Parsing failed, exception: {0}", exception.Message);
                 throw;
             }
-            return groups;
+            return (groups, firstLineParentGroupParsed, firstLineParentGroupFromDB, groupLookupFromDB, groupLookupParsed);
         }
 
         static void Importer_GroupImported(object sender, EntityImportedEventArgs<GroupImporter.GroupWithLoggingData> e)
@@ -56,13 +61,13 @@ namespace Geotab.SDK.ImportGroupsR
             GroupImporter.GroupImportedHandler(sender, e, Console.WriteLine, isVerboseMode, true);
         }
 
-        static void ImportGroups(API api, Group firstLineParentGroupParsed, Group firstLineParentGroupFromDB, int parsedGroupCount, IDictionary<string, Group> groupLookupFromDB, IDictionary<string, Group> groupLookupParsed, bool deleteEmptyGroups1, bool moveAssetsUp)
+        static async Task ImportGroupsAsync(API api, Group firstLineParentGroupParsed, Group firstLineParentGroupFromDB, int parsedGroupCount, IDictionary<string, Group> groupLookupFromDB, IDictionary<string, Group> groupLookupParsed, bool deleteEmptyGroups1, bool moveAssetsUp)
         {
             try
             {
                 var importer = new GroupImporter(api, firstLineParentGroupParsed, firstLineParentGroupFromDB, parsedGroupCount, groupLookupParsed, groupLookupFromDB, deleteEmptyGroups1, moveAssetsUp);
                 importer.EntityImported += Importer_GroupImported;
-                importer.DetermineDispositionAndImportGroups();
+                await importer.DetermineDispositionAndImportGroupsAsync();
             }
             catch (Exception exception)
             {
@@ -70,7 +75,7 @@ namespace Geotab.SDK.ImportGroupsR
             }
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             if (args.Length < 5)
             {
@@ -125,7 +130,7 @@ namespace Geotab.SDK.ImportGroupsR
                 //};
 
                 api = new API(userName, password, null, database, server);
-                api.Authenticate();
+                await api.AuthenticateAsync();
             }
             catch (Exception exception)
             {
@@ -136,10 +141,10 @@ namespace Geotab.SDK.ImportGroupsR
 
             try
             {
-                var groups = ExtractGroupsFromInputFile(api, inputFilePath, out Group firstLineParentGroupParsed, out Group firstLineParentGroupFromDB, out IDictionary<string, Group> groupLookupFromDB, out IDictionary<string, Group> groupLookupParsed);
+                var (groups, firstLineParentGroupParsed, firstLineParentGroupFromDB, groupLookupFromDB, groupLookupParsed) = await ExtractGroupsFromInputFile(api, inputFilePath);
                 if (groups?.Count > 0)
                 {
-                    ImportGroups(api, firstLineParentGroupParsed, firstLineParentGroupFromDB, groups.Count, groupLookupFromDB, groupLookupParsed, deleteEmptyGroups, moveAssetsUp);
+                    await ImportGroupsAsync(api, firstLineParentGroupParsed, firstLineParentGroupFromDB, groups.Count, groupLookupFromDB, groupLookupParsed, deleteEmptyGroups, moveAssetsUp);
                 }
                 else
                 {

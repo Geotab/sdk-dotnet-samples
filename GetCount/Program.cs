@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Exception = System.Exception;
@@ -21,7 +22,7 @@ namespace Geotab.SDK.GetCount
         /// A complete Geotab API object and method reference is available on the Geotab Developer page.
         /// </summary>
         /// <param name="args">The command line arguments passed to the application.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -72,7 +73,7 @@ namespace Geotab.SDK.GetCount
                 //     user to re-enter their login credentials.
                 try
                 {
-                    api.Authenticate();
+                    await api.AuthenticateAsync();
                 }
                 catch (InvalidUserException)
                 {
@@ -91,7 +92,7 @@ namespace Geotab.SDK.GetCount
 
                 // Make a call through the Geotab API for the count of devices. GetCountOf is a Generic method, meaning it can be called
                 // against many different object types. So we specify the type we want to get the count of as well as the method name.
-                var deviceCount = api.Call<int?>("GetCountOf", typeof(Device)).Value;
+                var deviceCount = (await api.CallAsync<int?>("GetCountOf", typeof(Device))).Value;
 
                 Console.WriteLine();
                 Console.WriteLine($" Total devices: {deviceCount}");

@@ -3,6 +3,7 @@ using Geotab.Checkmate.ObjectModel;
 using Geotab.Checkmate.ObjectModel.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace ImportGroupsR.Test
@@ -12,7 +13,7 @@ namespace ImportGroupsR.Test
         /// <summary>
         /// This is a saftey precausion. These tests automatically remove all devices, rules, groups, users, zones, custom reports and trailer from the target database. Do not run against a production database. Register a new database @ https://my112.geotab.com/registration.html with the "_test" postfix to run the tests against.
         /// </summary>
-        const string ExpectedDatabasePostFix = "_test";
+        const string ExpectedDatabasePostFix = "_tests";
         const string envUserName = "api_username";
         const string envPassword = "api_password";
         const string envDatabase = "api_database";
@@ -43,36 +44,40 @@ namespace ImportGroupsR.Test
             Log = log;
 
             api = new API(username, password, sessionId, database, server);
+        }
+
+        protected async Task SetupAsync()
+        {
             if (sessionId == null)
             {
-                api.Authenticate();
+                await api.AuthenticateAsync();
                 sessionId = api.LoginResult.Credentials.SessionId;
             }
 
             Log.WriteLine("Cleaning database...");
-            CleanDatabase(api);
+            await CleanDatabaseAsync(api);
             Log.WriteLine("Cleaning database complete");
         }
 
-        void CleanDatabase(API api)
+        async Task CleanDatabaseAsync(API api)
         {
-            CleanEntity<Rule>(api);
-            CleanEntity<Device>(api);
-            CleanEntity<Zone>(api);
-            CleanEntity<Trailer>(api);
-            CleanEntity<CustomReportSchedule>(api);
-            CleanUsers(api);
-            CleanEntity<Group>(api);
+            await CleanEntityAsync<Rule>(api);
+            await CleanEntityAsync<Device>(api);
+            await CleanEntityAsync<Zone>(api);
+            await CleanEntityAsync<Trailer>(api);
+            await CleanEntityAsync<CustomReportSchedule>(api);
+            await CleanUsersAsync(api);
+            await CleanEntityAsync<Group>(api);
         }
 
-        void CleanEntity<T>(API api) where T : Entity
+        async Task CleanEntityAsync<T>(API api) where T : Entity
         {
-            var entities = api.Call<object>("RemoveAll", typeof(T));
+            await api.CallAsync<object>("RemoveAll", typeof(T));
         }
 
-        void CleanUsers(API api)
+        async Task CleanUsersAsync(API api)
         {
-            var entities = api.Call<List<User>>("Get", typeof(User));
+            var entities = await api.CallAsync<List<User>>("Get", typeof(User));
             foreach (var entity in entities)
             {
                 if (entity.IsSystemEntity())
@@ -87,7 +92,7 @@ namespace ImportGroupsR.Test
                     continue;
                 }
 
-                api.Call<object>("Remove", typeof(User), new { entity });
+                await api.CallAsync<object>("Remove", typeof(User), new { entity });
             }
         }
     }

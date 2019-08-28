@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
@@ -24,7 +25,7 @@ namespace Geotab.SDK.SendTextMessage
         /// A complete Geotab API object and method reference is available at the Geotab SDK page.
         /// </summary>
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project > Properties > Debug Tab > Start Options: Command line arguments.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             if (args.Length != 4)
             {
@@ -53,10 +54,10 @@ namespace Geotab.SDK.SendTextMessage
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
-                api.Authenticate();
+                await api.AuthenticateAsync();
 
                 // Get a device to send text messages to.
-                IList<Device> devices = api.Call<IList<Device>>("Get", typeof(Device), new { resultsLimit = 1 });
+                IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device), new { resultsLimit = 1 });
 
                 // Make sure we have a device
                 if (devices == null || devices.Count == 0)
@@ -73,7 +74,7 @@ namespace Geotab.SDK.SendTextMessage
                 {
                     Name = username
                 };
-                IList<User> users = api.Call<List<User>>("Get", typeof(User), new { search = userSearch });
+                IList<User> users = await api.CallAsync<List<User>>("Get", typeof(User), new { search = userSearch });
                 if (users == null || users.Count == 0)
                 {
                     throw new InvalidOperationException("Could not find the user you are authenticated in as");
@@ -92,10 +93,10 @@ namespace Geotab.SDK.SendTextMessage
 
                 // Construct the text message
                 DateTime utcNow = DateTime.UtcNow;
-                TextMessage basicTextMessage = new TextMessage(null, utcNow, utcNow, messageRecipient, user, messageContent, true, true, null, null, null);
+                TextMessage basicTextMessage = new TextMessage(null, null, utcNow, utcNow, messageRecipient, user, messageContent, true, true, null, null, null);
 
                 // Add the text message. MyGeotab will take care of the actual sending.
-                basicTextMessage.Id = api.Call<Id>("Add", typeof(TextMessage), new { entity = basicTextMessage });
+                basicTextMessage.Id = await api.CallAsync<Id>("Add", typeof(TextMessage), new { entity = basicTextMessage });
 
                 /*
                  * Canned Response Message
@@ -114,7 +115,7 @@ namespace Geotab.SDK.SendTextMessage
                 TextMessage textMessageWithResponses = new TextMessage(messageRecipient, null, cannedResponseContent, true);
 
                 // Add the text message, Geotab will take care of the sending process.
-                textMessageWithResponses.Id = api.Call<Id>("Add", typeof(TextMessage), new { entity = textMessageWithResponses });
+                textMessageWithResponses.Id = await api.CallAsync<Id>("Add", typeof(TextMessage), new { entity = textMessageWithResponses });
                 Console.WriteLine("Text message sent");
 
                 // Keep track of our last "known" sent date. We will send another message but for the purpose of this example we are going to pretend it's from a Device.
@@ -128,8 +129,8 @@ namespace Geotab.SDK.SendTextMessage
 
                 // Here we are adding a new text message with "isDirectionToVehicle = false", this means the message came from the device.
                 // Normally, these will be sent by the Garmin device. This is just to show how to search for new responses.
-                TextMessage textMessageFromDevice = new TextMessage(null, utcNow, utcNow, messageRecipient, user, new TextContent(cannedResponseContent.CannedResponseOptions[0].Text, false), false, true, null, null, textMessageWithResponses);
-                textMessageFromDevice.Id = api.Call<Id>("Add", typeof(TextMessage), new { entity = textMessageFromDevice });
+                TextMessage textMessageFromDevice = new TextMessage(null, null, utcNow, utcNow, messageRecipient, user, new TextContent(cannedResponseContent.CannedResponseOptions[0].Text, false), false, true, null, null, textMessageWithResponses);
+                textMessageFromDevice.Id = await api.CallAsync<Id>("Add", typeof(TextMessage), new { entity = textMessageFromDevice });
 
                 Console.WriteLine("Response Sent");
 
@@ -138,7 +139,7 @@ namespace Geotab.SDK.SendTextMessage
                 //-------
 
                 // Request any messages that have been delivered/sent/read since the date provided.
-                IList<TextMessage> textMessages = api.Call<IList<TextMessage>>("Get", typeof(TextMessage), new { search = new TextMessageSearch(ToDate(lastKnownSentDate)) });
+                IList<TextMessage> textMessages = await api.CallAsync<IList<TextMessage>>("Get", typeof(TextMessage), new { search = new TextMessageSearch(ToDate(lastKnownSentDate)) });
 
                 Console.WriteLine($"{textMessages.Count} delivered/sent/read");
 
@@ -157,7 +158,7 @@ namespace Geotab.SDK.SendTextMessage
                 TextMessage clearMessage = new TextMessage(messageRecipient, user, clearStopsContent, true);
 
                 // Add the clear stops text message, Geotab will take care of the sending process.
-                clearMessage.Id = api.Call<Id>("Add", typeof(TextMessage), new { entity = clearMessage });
+                clearMessage.Id = await api.CallAsync<Id>("Add", typeof(TextMessage), new { entity = clearMessage });
 
                 Console.WriteLine("Clear Stops Message sent");
 
@@ -168,7 +169,7 @@ namespace Geotab.SDK.SendTextMessage
                 TextMessage locationMessage = new TextMessage(messageRecipient, user, withGPSLocation, true);
 
                 // Add the text message, Geotab will take care of the sending process.
-                locationMessage.Id = api.Call<Id>("Add", typeof(TextMessage), new { entity = locationMessage });
+                locationMessage.Id = await api.CallAsync<Id>("Add", typeof(TextMessage), new { entity = locationMessage });
 
                 Console.WriteLine("Address Message sent");
             }

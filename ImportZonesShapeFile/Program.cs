@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Geotab.Geographical;
@@ -108,7 +109,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
         /// A complete Geotab API object and method reference is available at the Geotab Developer page.
         /// </summary>
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project > Properties > Debug Tab > Start Options: Command line arguments.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -156,10 +157,10 @@ namespace Geotab.SDK.ImportZonesShapeFile
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
-                api.Authenticate();
+                await api.AuthenticateAsync();
 
                 Console.WriteLine("Getting current user...");
-                List<User> users = api.Call<List<User>>("Get", typeof(User), new { search = new UserSearch { Name = api.UserName } });
+                List<User> users = await api.CallAsync<List<User>>("Get", typeof(User), new { search = new UserSearch { Name = api.UserName } });
                 if (users.Count != 1)
                 {
                     Console.WriteLine($"Found {users.Count} users with name {api.UserName}.");
@@ -170,7 +171,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
                 var groups = users[0].CompanyGroups;
 
                 Console.WriteLine("Getting available zone types...");
-                List<ZoneType> availableZoneTypes = api.Call<List<ZoneType>>("Get", typeof(ZoneType));
+                List<ZoneType> availableZoneTypes = await api.CallAsync<List<ZoneType>>("Get", typeof(ZoneType));
 
                 // Options from args
                 for (int i = 4; i < last; i++)
@@ -289,7 +290,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
                                             coordinates = SimplifyPolygon(coordinates, distanceSquaredError);
 
                                             // Create the zone object to be inserted later on
-                                            zones.Add(new Zone(null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
+                                            zones.Add(new Zone(null, null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
                                         }
                                         coordinates = new List<ISimpleCoordinate>();
                                         zoneName = values[0];
@@ -313,7 +314,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
                         if (!string.IsNullOrEmpty(zoneName))
                         {
                             coordinates = SimplifyPolygon(coordinates, distanceSquaredError);
-                            zones.Add(new Zone(null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
+                            zones.Add(new Zone(null, null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
                         }
                     }
                 }
@@ -373,7 +374,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
                         // Simplify the polygon. This is an important step. Polygon complexity can drastically impact performance when loading/rendering zones.
                         coordinates = SimplifyPolygon(coordinates, distanceSquaredError);
 
-                        zones.Add(new Zone(null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
+                        zones.Add(new Zone(null, null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
                         featureIndex++;
                     }
                 }
@@ -393,7 +394,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
                     try
                     {
                         // Add the zone
-                        api.Call<Id>("Add", typeof(Zone), new { entity = zone });
+                        await api.CallAsync<Id>("Add", typeof(Zone), new { entity = zone });
                         Console.WriteLine($"Zone: '{zone.Name}' added");
                     }
                     catch (Exception exception)

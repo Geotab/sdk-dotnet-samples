@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Color = Geotab.Drawing.Color;
@@ -65,7 +66,7 @@ namespace Geotab.SDK.ImportZones
             double diagonal = 0.001F * size;
             IList<ISimpleCoordinate> circleCoordinates = GetCircleCoordinates(new Coordinate(longitude, latitude), diagonal / 2, polygonSides);
 
-            return new Zone(null, name, comment, true, zoneTypes, circleCoordinates, DateTime.MinValue, System.TimeZoneInfo.ConvertTimeToUtc(DateTime.MaxValue), color, true, groups);
+            return new Zone(null, null, name, comment, true, zoneTypes, circleCoordinates, DateTime.MinValue, System.TimeZoneInfo.ConvertTimeToUtc(DateTime.MaxValue), color, true, groups);
         }
 
         /// <summary>
@@ -172,7 +173,7 @@ namespace Geotab.SDK.ImportZones
         /// A complete Geotab API object and method reference is available at the Geotab Developer page.
         /// </summary>
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project > Properties > Debug Tab > Start Options: Command line arguments.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -275,16 +276,16 @@ namespace Geotab.SDK.ImportZones
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
-                api.Authenticate();
+                await api.AuthenticateAsync();
 
                 // Get user
-                User user = api.Call<User>("RefreshUser");
+                User user = await api.CallAsync<User>("RefreshUser");
 
                 // Start import
                 Console.WriteLine("Importing...");
 
-                IList<Zone> zones = api.Call<IList<Zone>>("Get", typeof(Zone));
-                IList<Group> allGroups = api.Call<IList<Group>>("Get", typeof(Group));
+                IList<Zone> zones = await api.CallAsync<IList<Zone>>("Get", typeof(Zone));
+                IList<Group> allGroups = await api.CallAsync<IList<Group>>("Get", typeof(Group));
 
                 // We only want to be able to assign Organization Group if the API user has this in their scope.
                 bool hasOrgGroupScope = false;
@@ -354,7 +355,7 @@ namespace Geotab.SDK.ImportZones
                     {
                         // Create a new zone object
                         Zone zone = CreateCircleZone(zoneRow.Name, "", zoneRow.Latitude, zoneRow.Longitude, zoneRow.Size, polygonSides, zoneTypes, zoneColor, new List<Group> { group });
-                        api.Call<Id>("Add", typeof(Zone), new { entity = zone });
+                        await api.CallAsync<Id>("Add", typeof(Zone), new { entity = zone });
                         Console.WriteLine($"Zone: '{zoneRow.Name}' added");
                     }
                     catch (Exception ex)
