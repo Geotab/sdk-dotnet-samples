@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>DataFeed</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <OutDir>bin\$(Configuration)\$(TargetFramework)</OutDir>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
@@ -10,7 +10,7 @@
     <RootNamespace>Geotab.SDK.DataFeed</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1903" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.1904" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotNetOpenAuth">
