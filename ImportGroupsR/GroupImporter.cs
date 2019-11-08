@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Geotab.Checkmate;
@@ -246,12 +247,12 @@ namespace Geotab.SDK.ImportGroupsR
         static void LogOffendingAssets(Group group, GroupRelations relations, LoggerAction log)
         {
             var stringBuilder = new StringBuilder();
-            bool entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Zones, false);
-            entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Devices, entitiesLogged);
-            entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Users, entitiesLogged);
-            entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Drivers.ConvertAll(GetDriver), entitiesLogged);
-            entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Rules, entitiesLogged);
-            LogOffendingCustomReportSchedules(group, stringBuilder, relations.CustomReportSchedules, entitiesLogged);
+            bool entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Zones.ToList(), false);
+            entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Devices.ToList(), entitiesLogged);
+            entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Users.ToList(), entitiesLogged);
+            entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Drivers.ToList().ConvertAll(GetDriver), entitiesLogged);
+            entitiesLogged = LogOffendingNameEntityClass(stringBuilder, relations.Rules.ToList(), entitiesLogged);
+            LogOffendingCustomReportSchedules(group, stringBuilder, relations.CustomReportSchedules.ToList(), entitiesLogged);
             if (stringBuilder.Length > 0)
             {
                 log(stringBuilder.ToString());
@@ -660,14 +661,14 @@ namespace Geotab.SDK.ImportGroupsR
 
         async Task PopulateRelationsAsync(GroupRelations relations)
         {
-            await PopulateNameEntitiesFromDBAsync<Zone, ZoneSearch>(relations.Zones);
-            await PopulateNameEntitiesFromDBAsync<Device, DeviceSearch>(relations.Devices);
-            await PopulateNameEntitiesFromDBAsync<User, UserSearch>(relations.Users);
-            await PopulateNameEntitiesFromDBAsync<Rule, RuleSearch>(relations.Rules);
+            await PopulateNameEntitiesFromDBAsync<Zone, ZoneSearch>(relations.Zones.ToList());
+            await PopulateNameEntitiesFromDBAsync<Device, DeviceSearch>(relations.Devices.ToList());
+            await PopulateNameEntitiesFromDBAsync<User, UserSearch>(relations.Users.ToList());
+            await PopulateNameEntitiesFromDBAsync<Rule, RuleSearch>(relations.Rules.ToList());
 
             // relation.Drivers is of List<User> type
-            await PopulateNameEntitiesFromDBAsync<User, UserSearch>(relations.Drivers);
-            await PopulateNestedEntitiesFromDBAsync<CustomReportSchedule, Search, ReportTemplate, Search>(relations.CustomReportSchedules, nameof(CustomReportSchedule.Template));
+            await PopulateNameEntitiesFromDBAsync<User, UserSearch>(relations.Drivers.ToList());
+            await PopulateNestedEntitiesFromDBAsync<CustomReportSchedule, Search, ReportTemplate, Search>(relations.CustomReportSchedules.ToList(), nameof(CustomReportSchedule.Template));
 
             //TODO: more assets
         }

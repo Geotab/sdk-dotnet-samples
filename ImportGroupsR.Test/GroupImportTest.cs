@@ -967,7 +967,10 @@ namespace ImportGroupsR.Test
             for (int i = 0; i < ruleCount; i++)
             {
                 ruleNumber += i;
-                var rule = new Rule(null, null, $"Rule{ruleNumber}", new Color(255, 127, 80), "Comment", new List<Group> { group }, ExceptionRuleBaseType.Custom, DateTime.UtcNow, DateTime.MaxValue);
+                var rule = new Rule(null, null, $"Rule{ruleNumber}", new Color(255, 127, 80), "Comment", new List<Group> { group }, ExceptionRuleBaseType.Custom, DateTime.UtcNow, DateTime.MaxValue)
+                {
+                    Condition = new Condition { ConditionType = ConditionType.Aux1, Value = 1 }
+                };
                 rule.Id = await api.CallAsync<Id>("Add", typeof(Rule), new { entity = rule });
                 Assert.NotNull(rule.Id);
             }
