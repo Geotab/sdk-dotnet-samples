@@ -146,15 +146,14 @@ namespace ImportGroupsR.Test
             return minDateTime.AddMilliseconds(GetRandomInt(0, maxIntMillis) * (long)GetRandomInt(0, maxIntMillis));
         }
 
-        public GoDevice GetGoDevice(int hardwareId, List<Group> groups)
+        public Trailer GetTrailer(int trailerNumber, List<Group> groups)
         {
-            GoDevice device = (GoDevice)Device.FromProductId(Device.Go7ProductId);
-            device.PopulateDefaults();
-            device.Name = GetRandomString(16);
-            device.HardwareId = hardwareId;
-            device.Groups = groups;
-
-            return device;
+            return new Trailer
+            {
+                Name = $"{GetRandomString(16)} {trailerNumber}",
+                Groups = groups,
+                Comment = GetRandomString(16)
+            };
         }
 
         public Zone GetZone(List<Group> groups)

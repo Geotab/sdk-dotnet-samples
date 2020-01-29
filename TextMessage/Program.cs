@@ -93,7 +93,7 @@ namespace Geotab.SDK.SendTextMessage
 
                 // Construct the text message
                 DateTime utcNow = DateTime.UtcNow;
-                TextMessage basicTextMessage = new TextMessage(null, null, utcNow, utcNow, messageRecipient, user, messageContent, true, true, null, null, null);
+                TextMessage basicTextMessage = new TextMessage(null, null, utcNow, utcNow, messageRecipient, user, messageContent, true, null, null, null, null, null);
 
                 // Add the text message. MyGeotab will take care of the actual sending.
                 basicTextMessage.Id = await api.CallAsync<Id>("Add", typeof(TextMessage), new { entity = basicTextMessage });
@@ -129,7 +129,7 @@ namespace Geotab.SDK.SendTextMessage
 
                 // Here we are adding a new text message with "isDirectionToVehicle = false", this means the message came from the device.
                 // Normally, these will be sent by the Garmin device. This is just to show how to search for new responses.
-                TextMessage textMessageFromDevice = new TextMessage(null, null, utcNow, utcNow, messageRecipient, user, new TextContent(cannedResponseContent.CannedResponseOptions[0].Text, false), false, true, null, null, textMessageWithResponses);
+                TextMessage textMessageFromDevice = new TextMessage(null, null, utcNow, utcNow, messageRecipient, user, new TextContent(cannedResponseContent.CannedResponseOptions[0].Text, false), true, null, null, textMessageWithResponses, null, null);
                 textMessageFromDevice.Id = await api.CallAsync<Id>("Add", typeof(TextMessage), new { entity = textMessageFromDevice });
 
                 Console.WriteLine("Response Sent");
