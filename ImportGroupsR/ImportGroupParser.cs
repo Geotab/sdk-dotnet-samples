@@ -244,7 +244,7 @@ namespace Geotab.SDK.ImportGroupsR
 
                 if (string.IsNullOrEmpty(rootGroupSreference) || rootGroupSreference.Equals(CompanyGroupSReference, stringComparison))
                 {
-                    rootGroupParsed = new CompanyGroup(0, 0, null, CompanyGroupSReference); // Company Group will not be added to the database by client code
+                    rootGroupParsed = new CompanyGroup(null, CompanyGroupSReference); // Company Group will not be added to the database by client code
                 }
                 else if (GroupLookupFromDB.TryGetValue(rootGroupSreference, out rootGroupFromDb))
                 {
@@ -289,7 +289,7 @@ namespace Geotab.SDK.ImportGroupsR
             }
 
             // Link parsed group into the group tree
-            childGroup = Group.Get(null, parentGroup, childName, childDescription, null, null, childSreference, new Drawing.Color(childColor, false));
+            childGroup = Group.Get(null, parentGroup, childName, childDescription, childSreference, new Drawing.Color(childColor, false));
             GroupLookupParsed.Add(childSreference, childGroup);
             parentGroup.Children.Add(childGroup);
 
