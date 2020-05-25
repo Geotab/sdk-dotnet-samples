@@ -17,7 +17,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.2001" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.2002" />
     <PackageReference Include="CoreCompat.System.Drawing.v2" Version="5.2.0-preview1-r131" />
   </ItemGroup>
 </Project>
