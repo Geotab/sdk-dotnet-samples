@@ -8,9 +8,10 @@
     <WarningsAsErrors />
     <LangVersion>latest</LangVersion>
     <RootNamespace>Geotab.SDK.DataFeed</RootNamespace>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.2101" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.2102" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotNetOpenAuth">

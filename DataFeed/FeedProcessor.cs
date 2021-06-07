@@ -269,7 +269,7 @@ namespace Geotab.SDK.DataFeed
             }
             UserSearch userSearch = new UserSearch(id)
             {
-                IsDriver = true
+                UserSearchType = UserSearchType.Driver
             };
             IList<User> returnedDriver = await api.CallAsync<List<User>>("Get", typeof(User), new { search = userSearch });
             if (returnedDriver.Count == 0)
@@ -286,7 +286,7 @@ namespace Geotab.SDK.DataFeed
             UserSearch userSearch =
             new UserSearch
             {
-                IsDriver = true
+                UserSearchType = UserSearchType.Driver
             };
             IList<User> drivers = await api.CallAsync<List<User>>("Get", typeof(User), new { search = userSearch });
             if (drivers != null)
