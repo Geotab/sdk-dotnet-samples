@@ -8,6 +8,7 @@
     <WarningsAsErrors />
     <LangVersion>latest</LangVersion>
     <RootNamespace>Geotab.SDK.DataFeed</RootNamespace>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.2102" />
