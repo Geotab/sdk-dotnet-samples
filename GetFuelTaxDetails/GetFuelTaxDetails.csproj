@@ -9,6 +9,6 @@
     <RootNamespace>Geotab.SDK.GetFuelTaxDetails</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.2101" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="5.7.2102" />
   </ItemGroup>
 </Project>
