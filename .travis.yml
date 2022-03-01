@@ -1,6 +1,6 @@
 language: csharp
 solution: SdkExamples.sln
-dotnet: 5.0.300
+dotnet: 6.0.200
 mono: none
 install:
 - dotnet restore
