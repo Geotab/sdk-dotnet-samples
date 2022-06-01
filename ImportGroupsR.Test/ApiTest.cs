@@ -64,7 +64,6 @@ namespace ImportGroupsR.Test
             await CleanEntityAsync<Rule>(api);
             await CleanEntityAsync<Device>(api);
             await CleanEntityAsync<Zone>(api);
-            await CleanEntityAsync<Trailer>(api);
             await CleanEntityAsync<CustomReportSchedule>(api);
             await CleanUsersAsync(api);
             await CleanEntityAsync<Group>(api);

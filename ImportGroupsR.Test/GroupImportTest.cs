@@ -144,19 +144,6 @@ namespace ImportGroupsR.Test
         /// 
         /// </summary>
         [Fact]
-        public async Task ImportGroups_WithTrailers_Deleted_Test()
-        {
-            await SetupAsync();
-            var importDeleted = new ImportDeleted(this);
-            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateTrailersForDeletedAsync });
-            await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
-            await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [Fact]
         public async Task ImportGroups_WithUsers_Deleted_Test()
         {
             await SetupAsync();
@@ -503,12 +490,6 @@ namespace ImportGroupsR.Test
                 await CreateZonesForDeletedAfterGettingGroupsFromDBAsync(api);
             }
 
-            public async Task CreateTrailersForDeletedAsync(API api)
-            {
-                (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
-                await CreateTrailersForDeletedAfterGettingGroupsFromDAsyncB(api);
-            }
-
             public async Task CreateUsersForDeletedAsync(API api)
             {
                 (testClass.lookupSreferenceToGroupFromDbForVerification, testClass.lookupIdToGroupFromDbForVerification, testClass.groupsInDBWithNonUniqueReferenceLookup, testClass.groupsInDBWithNonUniqueIdLookup) = await GetAllGroupsFromDBAsync(api);
@@ -552,21 +533,6 @@ namespace ImportGroupsR.Test
             {
                 await testClass.AddZoneToGroupAsync(api, GenerateSReference(2, 3));
                 await testClass.AddZoneToGroupAsync(api, GenerateSReference(1, 2));
-            }
-
-            /// <summary>
-            /// Add trailers to DB and associate them with groups for testing
-            /// </summary>
-            /// <param name="api"></param>
-            /// <returns>device number of the last device created</returns>
-            async Task<int> CreateTrailersForDeletedAfterGettingGroupsFromDAsyncB(API api)
-            {
-                var sReference = GenerateSReference(2, 3);
-                int deviceNumber = 1;
-                deviceNumber = await testClass.AddTrailersToGroupAsync(api, sReference, deviceNumber, 2) + 1;
-                sReference = GenerateSReference(1, 2);
-                deviceNumber = await testClass.AddTrailersToGroupAsync(api, sReference, deviceNumber);
-                return deviceNumber;
             }
 
             async Task<int> CreateUsersForDeletedAfterGettingGroupsFromDBAsync(API api)
@@ -916,27 +882,6 @@ namespace ImportGroupsR.Test
             zone.Id = await api.CallAsync<Id>("Add", typeof(Zone), new { entity = zone });
         }
 
-        /// <summary>
-        /// Creates and adds devices to a group
-        /// </summary>
-        /// <param name="api"></param>
-        /// <param name="groupSreference"></param>
-        /// <param name="trailerNumber"></param>
-        /// <param name="deviceCount"></param>
-        /// <returns>number of the last added device</returns>
-        async Task<int> AddTrailersToGroupAsync(API api, string groupSreference, int trailerNumber, int deviceCount = 1)
-        {
-            var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
-            for (int i = 0; i < deviceCount; i++)
-            {
-                trailerNumber += i;
-                var trailer = testValueHelper.GetTrailer(trailerNumber, new List<Group> { group });
-                trailer.Id = await api.CallAsync<Id>("Add", typeof(Trailer), new { entity = trailer });
-                Assert.NotNull(trailer.Id);
-            }
-            return trailerNumber;
-        }
-
         async Task<int> AddUsersToGroupAsync(API api, string groupSreference, int userNumber, int userCount = 1)
         {
             var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
@@ -1030,7 +975,7 @@ namespace ImportGroupsR.Test
         {
             if (!lookupSreferenceToGroupFromDbForVerification.TryGetValue(groupSreference, out Group group))
             {
-                Assert.False(true, $"In {nameof(AddTrailersToGroupAsync)}: Group with SReference {groupSreference} is not in the database.");
+                Assert.False(true, $"Group with SReference {groupSreference} is not in the database.");
             }
             return group;
         }

@@ -18,7 +18,7 @@ namespace ImportGroupsR.Test
                 devices = new List<Device>(),
                 reportArgumentType = "DeviceActivityDetail"
             };
-            return new CustomReportSchedule(null, true, ReportFrequency.Daily, ReportPeriod.PreviousDay, GetReportTemplate(templateName), reportDestination, argument, GetRandomDateTime(true), GetUser(), Id.Create(Guid.NewGuid()), scopeGroups, includeAllChildrenGroups, includeDirectChildrenOnlyGroups);
+            return new CustomReportSchedule(null, true, ReportFrequency.Daily, ReportPeriod.PreviousDay, GetReportTemplate(templateName), reportDestination, argument, GetRandomDateTime(true), GetUser(), Id.Create(Guid.NewGuid()), scopeGroups, null, includeAllChildrenGroups, includeDirectChildrenOnlyGroups);
         }
 
         public ReportTemplate GetReportTemplate(string templateName)
@@ -144,16 +144,6 @@ namespace ImportGroupsR.Test
             }
             int maxIntMillis = (int)Math.Sqrt(maxMillis);
             return minDateTime.AddMilliseconds(GetRandomInt(0, maxIntMillis) * (long)GetRandomInt(0, maxIntMillis));
-        }
-
-        public Trailer GetTrailer(int trailerNumber, List<Group> groups)
-        {
-            return new Trailer
-            {
-                Name = $"{GetRandomString(16)} {trailerNumber}",
-                Groups = groups,
-                Comment = GetRandomString(16)
-            };
         }
 
         public Zone GetZone(List<Group> groups)
