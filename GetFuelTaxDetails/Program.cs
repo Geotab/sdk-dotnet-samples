@@ -48,10 +48,10 @@ namespace Geotab.SDK.GetFuelTaxDetails
 
                 // Set the beginning of the time interval. It will be extended to the nearest hour. For example, 4:20:00 will become 4:00:00.
 
-                DateTime fromDate = new DateTime(2018, 1, 1, 5, 0, 0, DateTimeKind.Utc);
+                DateTime fromDate = new DateTime(2022, 1, 1, 5, 0, 0, DateTimeKind.Utc);
 
                 // Set the end of the time interval. It will be extended to the nearest hour. For example, 3:45:00 will become 4:00:00.
-                DateTime toDate = new DateTime(2018, 2, 1, 5, 0, 0, DateTimeKind.Utc);
+                DateTime toDate = new DateTime(2022, 2, 1, 5, 0, 0, DateTimeKind.Utc);
 
                 // Create the Geotab API object.
                 // It is important to create this object with the base "Federation" server (my.geotab.com) NOT the specific server (e.g. my3.geotab.com).
@@ -156,7 +156,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
         static bool AreAttributesEqual(FuelTaxDetail detail1, FuelTaxDetail detail2, dynamic options)
         {
             return detail1.Jurisdiction == detail2.Jurisdiction
-                && (!options.DriverIdentification || detail1.Driver.Equals(detail2.TollRoad))
+                && (!options.DriverIdentification || detail1.Driver.Equals(detail2.Driver))
                 && (!options.TollRoadIdentification || detail1.TollRoad == detail2.TollRoad)
                 && (!options.AuthorityIdentification || detail1.Authority == detail2.Authority);
         }
