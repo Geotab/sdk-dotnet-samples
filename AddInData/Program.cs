@@ -1,11 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using Geotab.Checkmate;
-using Geotab.Serialization;
+﻿using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Exception = System.Exception;
-using System.Dynamic;
-using System.Text;
 
 namespace Geotab.SDK.StorageApi
 {
