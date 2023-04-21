@@ -48,13 +48,12 @@ namespace Geotab.SDK.GetFuelTaxDetails
 
                 // Set the beginning of the time interval. It will be extended to the nearest hour. For example, 4:20:00 will become 4:00:00.
 
-                DateTime fromDate = new DateTime(2022, 1, 1, 5, 0, 0, DateTimeKind.Utc);
+                DateTime fromDate = new DateTime(2023, 1, 1, 5, 0, 0, DateTimeKind.Utc);
 
                 // Set the end of the time interval. It will be extended to the nearest hour. For example, 3:45:00 will become 4:00:00.
-                DateTime toDate = new DateTime(2022, 2, 1, 5, 0, 0, DateTimeKind.Utc);
+                DateTime toDate = new DateTime(2023, 3, 31, 5, 0, 0, DateTimeKind.Utc);
 
                 // Create the Geotab API object.
-                // It is important to create this object with the base "Federation" server (my.geotab.com) NOT the specific server (e.g. my3.geotab.com).
                 // A database can be moved to another server without notice.
                 Console.WriteLine();
                 Console.WriteLine("Creating API...");
@@ -63,7 +62,8 @@ namespace Geotab.SDK.GetFuelTaxDetails
 
                 // The example code will retrieve fuel tax details for one device at a time. For smaller fleets, it is feasible to retrieve the details for all devices by removing the device search from the search object below.
                 Console.WriteLine("Retrieving devices...");
-                IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device));
+                Id groupVehicleId = KnownId.GroupVehicleId;
+                IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device), new { search = new DeviceSearch { Groups = new List<GroupSearch> { new GroupSearch(groupVehicleId) }} } );
 
                 // Get the fuel tax details restricted to the time interval, grouped by device, and sorted by enter time.
                 Console.WriteLine("Retrieving fuel tax details...");
