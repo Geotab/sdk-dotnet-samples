@@ -47,7 +47,6 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 };
 
                 // Set the beginning of the time interval. It will be extended to the nearest hour. For example, 4:20:00 will become 4:00:00.
-
                 DateTime fromDate = new DateTime(2023, 4, 1, 5, 0, 0, DateTimeKind.Utc);
 
                 // Set the end of the time interval. It will be extended to the nearest hour. For example, 3:45:00 will become 4:00:00.
@@ -181,7 +180,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                     detail.ExitGpsOdometer = lastDetail.ExitGpsOdometer;
                     detail.ExitLatitude = lastDetail.ExitLatitude;
                     detail.ExitLongitude = lastDetail.ExitLongitude;
-                    detail.IsEnterOdometerInterpolated = lastDetail.IsEnterOdometerInterpolated; // NEW
+                    detail.IsExitOdometerInterpolated = lastDetail.IsExitOdometerInterpolated;
                     for (var detailIndex = 1; detailIndex < detailCount; detailIndex++)
                     {
                         var nextDetail = group[detailIndex];
@@ -191,7 +190,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                             detail.HourlyGpsOdometer.Add(nextDetail.EnterGpsOdometer);
                             detail.HourlyLatitude.Add(nextDetail.EnterLatitude);
                             detail.HourlyLongitude.Add(nextDetail.EnterLongitude);
-                            detail.HourlyIsOdometerInterpolated.Add(nextDetail.IsExitOdometerInterpolated); // NEW
+                            detail.HourlyIsOdometerInterpolated.Add(nextDetail.IsEnterOdometerInterpolated);
                         }
                         for (int hourIndex = 0; hourIndex < nextDetail.HourlyOdometer.Count; hourIndex++)
                         {
@@ -199,7 +198,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                             detail.HourlyGpsOdometer.Add(nextDetail.HourlyGpsOdometer[hourIndex]);
                             detail.HourlyLatitude.Add(nextDetail.HourlyLatitude[hourIndex]);
                             detail.HourlyLongitude.Add(nextDetail.HourlyLongitude[hourIndex]);
-                            detail.HourlyIsOdometerInterpolated.Add(nextDetail.HourlyIsOdometerInterpolated[hourIndex]); // NEW
+                            detail.HourlyIsOdometerInterpolated.Add(nextDetail.HourlyIsOdometerInterpolated[hourIndex]);
                         }
                     }
                 }
