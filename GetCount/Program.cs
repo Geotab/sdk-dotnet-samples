@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Exception = System.Exception;
@@ -12,12 +13,12 @@ namespace Geotab.SDK.GetCount
     static class Program
     {
         /// <summary>
-        /// This is a Geotab API console example to count the devices in your database.
+        /// This is a Geotab API console example to count any entities in your database.
         ///
         /// Steps:
         /// 1) Create API from command line arguments.
         /// 2) Authenticate the user.
-        /// 3) Get the count of devices.
+        /// 3) Get the count of entities.
         ///
         /// A complete Geotab API object and method reference is available on the Geotab Developer page.
         /// </summary>
@@ -31,18 +32,19 @@ namespace Geotab.SDK.GetCount
                 Console.WriteLine(" Geotab SDK");
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-                if (args.Length != 4)
+                if (args.Length != 5)
                 {
                     Console.WriteLine();
                     Console.WriteLine(" Command line parameters:");
-                    Console.WriteLine(" dotnet run <server> <database> <username> <password>");
+                    Console.WriteLine(" dotnet run <server> <database> <username> <password> <countObject>");
                     Console.WriteLine();
-                    Console.WriteLine(" Example: dotnet run server database username password");
+                    Console.WriteLine(" Example: dotnet run server database username password countObject");
                     Console.WriteLine();
                     Console.WriteLine(" server   - Server host name (Example: my.geotab.com)");
                     Console.WriteLine(" database - Database name (Example: G560)");
                     Console.WriteLine(" username - Geotab user name");
                     Console.WriteLine(" password - Geotab password");
+                    Console.WriteLine(" countObject - Geotab object to be counted (Example : Zone)");
 
                     return;
                 }
@@ -52,6 +54,7 @@ namespace Geotab.SDK.GetCount
                 var database = args[1];
                 var username = args[2];
                 var password = args[3];
+                var inputtedEntity = args[4];
 
                 Console.WriteLine();
                 Console.WriteLine(" Creating API...");
@@ -88,14 +91,56 @@ namespace Geotab.SDK.GetCount
                     return;
                 }
 
-                Console.WriteLine(" Counting devices...");
+                //convert the provided string representation of the object to the type of object
+                Type countEntityType =  Type.GetType($"Geotab.Checkmate.ObjectModel.{inputtedEntity},Geotab.Checkmate.ObjectModel");
+
+                Console.WriteLine($" Counting {inputtedEntity}s/Vehicles/Trailers...");
 
                 // Make a call through the Geotab API for the count of devices. GetCountOf is a Generic method, meaning it can be called
                 // against many different object types. So we specify the type we want to get the count of as well as the method name.
-                var deviceCount = (await api.CallAsync<int?>("GetCountOf", typeof(Device))).Value;
+                var entityCount = (await api.CallAsync<int?>("GetCountOf",  countEntityType)).Value;
+
+                //Create a DeviceSearch object for active devices and filtering only assets assigned to the Vehicle group
+                DeviceSearch deviceSearch = new DeviceSearch
+                {
+                    FromDate = DateTime.UtcNow,
+                    Groups = new List<GroupSearch>
+                    {
+                        new GroupSearch
+                        {
+                            Id = Id.Create("GroupVehicleId")
+                        }
+                    }
+                };
+
+                var vehicleCount = (await api.CallAsync<IList<Device>>("Get", typeof(Device), new { search = deviceSearch })).Count;
+
+
+                deviceSearch = new DeviceSearch
+                {
+                    Groups = new List<GroupSearch>
+                    {
+                        new GroupSearch
+                        {
+                            Id = Id.Create("GroupTrailerId")
+                        }
+                    }
+                };
+
+                var trailerCount = (await api.CallAsync<IList<Device>>("Get", typeof(Device), new { search = deviceSearch })).Count;
 
                 Console.WriteLine();
-                Console.WriteLine($" Total devices: {deviceCount}");
+                Console.WriteLine($" Total {inputtedEntity}s : {entityCount}");
+                Console.WriteLine($" Total Active Vehicles : {vehicleCount}");
+                Console.WriteLine($" Total Trailers : {trailerCount}");
+            }catch(InvalidPermissionsException)
+            {
+                Console.WriteLine(" User does not have valid permissions");
+                return;
+            }catch(MissingMethodException)
+            {
+                Console.WriteLine(" Incorrect Object to count");
+                return;
             }
             catch (Exception exception)
             {
