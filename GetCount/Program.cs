@@ -96,7 +96,7 @@ namespace Geotab.SDK.GetCount
 
                 Console.WriteLine($" Counting {inputtedEntity}s/Vehicles/Trailers...");
 
-                // Make a call through the Geotab API for the count of devices. GetCountOf is a Generic method, meaning it can be called
+                // Make a call through the Geotab API for the count of any entity that is supported. GetCountOf is a Generic method, meaning it can be called
                 // against many different object types. So we specify the type we want to get the count of as well as the method name.
                 var entityCount = (await api.CallAsync<int?>("GetCountOf",  countEntityType)).Value;
 
