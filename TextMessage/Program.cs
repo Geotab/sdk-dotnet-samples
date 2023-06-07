@@ -57,7 +57,9 @@ namespace Geotab.SDK.SendTextMessage
                 await api.AuthenticateAsync();
 
                 // Get a device to send text messages to.
-                IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device), new { resultsLimit = 1 });
+                string groupId = "GroupVehicleId";
+                IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device), new { resultsLimit = 1, groups = new [] { new { id = groupId } } });
+
 
                 // Make sure we have a device
                 if (devices == null || devices.Count == 0)
@@ -67,7 +69,7 @@ namespace Geotab.SDK.SendTextMessage
 
                 Device messageRecipient = devices[0];
 
-                Console.WriteLine("Messages will be send to: " + messageRecipient.Name);
+                Console.WriteLine("Messages will be sent to vehicle: " + messageRecipient.Name);
 
                 // Get the User who the messages will be sent from
                 UserSearch userSearch = new UserSearch
