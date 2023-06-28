@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
+using Geotab.Checkmate.ObjectModel.AssetGroups;
 
 namespace Geotab.SDK.ImportGroups
 {
@@ -17,7 +18,7 @@ namespace Geotab.SDK.ImportGroups
         /// </summary>
         /// <param name="fileName">The name of the file to load.</param>
         /// <returns>A collection of <see cref="GroupRow"/> objects.</returns>
-        static List<GroupRow> LoadGroupRowsFromCSV(string fileName)
+        static async Task<List<GroupRow>> LoadGroupRowsFromCSV(string fileName)
         {
             List<GroupRow> groups = new List<GroupRow>();
             int count = 0;
@@ -27,7 +28,7 @@ namespace Geotab.SDK.ImportGroups
             {
                 // Create a GroupRow for each line of the file
                 string line;
-                while ((line = streamReader.ReadLine()) != null)
+                while ((line = await streamReader.ReadLineAsync()) != null)
                 {
                     // Consider lines starting with # to be comments
                     if (line.StartsWith("#", StringComparison.Ordinal))
@@ -54,7 +55,12 @@ namespace Geotab.SDK.ImportGroups
             }
             return groups;
         }
-
+        
+        
+        private static String timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+        private static String fileNameLogs = $"logs_{timestamp}.csv";
+        private static String filePathLogs = Path.Combine(Directory.GetCurrentDirectory(), fileNameLogs);
+        private static StreamWriter writer = new StreamWriter(filePathLogs, true) { AutoFlush = true };
         /// <summary>
         /// This is a Geotab API console example of importing groups from a CSV file.
         /// 1) Process command line arguments: Server, Database, Username, Password, Input File and load CSV file.
@@ -94,10 +100,11 @@ namespace Geotab.SDK.ImportGroups
 
                 // Load GroupRow collection from the given .csv file
                 Console.WriteLine("Loading .csv file...");
+
                 List<GroupRow> groupRows;
                 try
                 {
-                    groupRows = LoadGroupRowsFromCSV(fileName);
+                    groupRows = await LoadGroupRowsFromCSV(fileName);
                 }
                 catch (Exception exception)
                 {
@@ -105,11 +112,19 @@ namespace Geotab.SDK.ImportGroups
                     return;
                 }
 
+                // Creates a log file
+                // string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+                // string fileNameLogs = $"logs_{timestamp}.csv";
+                // string filePathLogs = Path.Combine(Directory.GetCurrentDirectory(), fileNameLogs);
+
+                // File.Create(filePathLogs).Close();
+
                 // Create Geotab API object
                 API api = new API(username, password, null, database, server);
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
+                AddingLog("Authentication successful");
                 await api.AuthenticateAsync();
 
                 // Start import
@@ -147,6 +162,7 @@ namespace Geotab.SDK.ImportGroups
                         if (!existingGroupDictionary.TryGetValue(parentGroupName.ToLowerInvariant(), out parentGroup))
                         {
                             Console.WriteLine($"Non-existent parent Group: {parentGroupName}");
+                            AddingLog($"Non-existent parent Group: {parentGroupName}");
                             continue;
                         }
                     }
@@ -155,6 +171,7 @@ namespace Geotab.SDK.ImportGroups
                     if (parentGroup == null)
                     {
                         Console.WriteLine($"No parent for Group {row.GroupName}");
+                        AddingLog($"No parent for Group {row.GroupName}");
                         continue;
                     }
 
@@ -164,20 +181,34 @@ namespace Geotab.SDK.ImportGroups
                     if (existingGroupDictionary.ContainsKey(row.GroupName.ToLowerInvariant()))
                     {
                         Console.WriteLine($"A group with the name '{row.GroupName}' already exists, please change this group name.");
+                        AddingLog($"A group with the name '{row.GroupName}' already exists, please change this group name.");
                         continue;
                     }
 
                     try
-                    {
-                        // Make API call to add the node.
-                        var groupToAdd = new Group(null, parentGroup, row.GroupName);
-                        await api.CallAsync<Id>("Add", typeof(Group), new { entity = groupToAdd });
-                        Console.WriteLine($"Successfully added: {row.GroupName}");
+                    {     
+                        // determines if the parentGroup is a build in group
+                        if((parentGroup.Id.ToString().Contains("Id"))) 
+                        {
+                            var groupToAdd = new GroupWithGlobalReporting(null,name:row.GroupName, parent:Group.Get(parentGroup.Id));
+                            groupToAdd.IsGlobalReportingGroup = true;
+                            await api.CallAsync<Id>("Add", typeof(Group), new { entity = groupToAdd });
+                            Console.WriteLine($"Successfully added: {row.GroupName}");
+                            AddingLog($"Successfully added: {row.GroupName}");
+                        }
+                        else 
+                        {
+                            var groupToAdd = new Group(null,name:row.GroupName, parent:parentGroup);
+                            await api.CallAsync<Id>("Add", typeof(Group), new { entity = groupToAdd });
+                            Console.WriteLine($"Successfully added: {row.GroupName}");
+                            AddingLog($"Successfully added: {row.GroupName}");
+                        }
                     }
                     catch (Exception exception)
                     {
-                        // Catch exceptions here so we can continue trying to add nodes.
+                        // Catch exceptions here so we can continue trying to add nodes.
                         Console.WriteLine($"Could not add {row.GroupName}: {exception.Message}");
+                        AddingLog($"Could not add {row.GroupName}: {exception.Message}");
                     }
                 }
             }
@@ -185,12 +216,21 @@ namespace Geotab.SDK.ImportGroups
             {
                 // Show miscellaneous exceptions
                 Console.WriteLine($"Error: {ex.Message}\n{ex.StackTrace}");
+                AddingLog($"Error: {ex.Message}\n{ex.StackTrace}");
             }
             finally
             {
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey(true);
             }
+        }
+
+        /// <summary>
+        ///saves a string to the created Log file
+        /// </summary>
+        public static void AddingLog(string input)
+        {
+            writer.WriteLine(input);
         }
 
         /// <summary>
@@ -207,6 +247,7 @@ namespace Geotab.SDK.ImportGroups
             for (var i = 0; i < dataStoreGroups.Count; i++)
             {
                 var group = dataStoreGroups[i];
+                
                 if (nonUniqueGroups.Contains(group.Name))
                 {
                     continue;
@@ -220,6 +261,7 @@ namespace Geotab.SDK.ImportGroups
                     // don't allow ambiguous names
                     groupDictionary.Remove(group.Name);
                     Console.WriteLine($"group name '{group.Name}' is not unique, cannot use it as parent for import.");
+                    AddingLog($"group name '{group.Name}' is not unique, cannot use it as parent for import.");
                     nonUniqueGroups.Add(group.Name);
                 }
             }

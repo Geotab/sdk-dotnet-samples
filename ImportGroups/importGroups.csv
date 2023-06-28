@@ -6,13 +6,16 @@
 # 
 # create 2 groups under 'Organization'
 # -------------------------------------------------------------------------
-Organization,DriverGroup
-Organization,VehicleGroups
+Organization,Europe
+Organization,NorthAmerica
 # -------------------------------------------------------------------------
-# create 2 groups: 'Canada' and 'USA' with the parent group: 'VehicleGroups'
+# create 4 groups: 'Canada' and 'USA' with the parent group: 'NorthAmerica'
+# and 'Transnistria' and 'UK' with the parent group: 'Europe'
 # -------------------------------------------------------------------------
-VehicleGroups,Canada
-VehicleGroups,USA
+NorthAmerica,Canada
+NorthAmerica,USA
+Europe,Transnistria
+Europe,UK
 # -------------------------------------------------------------------------
 # create 2 groups under Canada
 # -------------------------------------------------------------------------
@@ -23,3 +26,8 @@ Canada,BC
 # -------------------------------------------------------------------------
 USA,CA
 USA,MI
+# -------------------------------------------------------------------------
+# create 2 groups under built in groups
+# -------------------------------------------------------------------------
+Vehicle,Cars
+Vehicle,Stagecoach
