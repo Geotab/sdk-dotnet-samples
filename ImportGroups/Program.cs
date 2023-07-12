@@ -187,8 +187,8 @@ namespace Geotab.SDK.ImportGroups
 
                     try
                     {     
-                        // determines if the parentGroup is a build in group
-                        if((parentGroup.Id.ToString().Contains("Id"))) 
+                        // // determines if the parentGroup is a build in group
+                        if((parentGroup.Id.ToString().Contains("Id")) && (parentGroup.Id.ToString() != "GroupCompanyId")) 
                         {
                             var groupToAdd = new GroupWithGlobalReporting(null,name:row.GroupName, parent:Group.Get(parentGroup.Id));
                             groupToAdd.IsGlobalReportingGroup = true;
@@ -203,6 +203,8 @@ namespace Geotab.SDK.ImportGroups
                             Console.WriteLine($"Successfully added: {row.GroupName}");
                             AddingLog($"Successfully added: {row.GroupName}");
                         }
+
+                            
                     }
                     catch (Exception exception)
                     {
@@ -260,7 +262,6 @@ namespace Geotab.SDK.ImportGroups
                 {
                     // don't allow ambiguous names
                     groupDictionary.Remove(group.Name);
-                    Console.WriteLine($"group name '{group.Name}' is not unique, cannot use it as parent for import.");
                     AddingLog($"group name '{group.Name}' is not unique, cannot use it as parent for import.");
                     nonUniqueGroups.Add(group.Name);
                 }
