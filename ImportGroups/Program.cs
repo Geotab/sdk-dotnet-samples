@@ -6,13 +6,21 @@ using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Geotab.Checkmate.ObjectModel.AssetGroups;
 
+
+
 namespace Geotab.SDK.ImportGroups
 {
+    
     /// <summary>
     /// Main program
     /// </summary>
     static class Program
     {
+        /// creates path and name of log file
+        private static String fileNameLogs = $"logs_{timestamp}.csv";
+        private static String filePathLogs = Path.Combine(Directory.GetCurrentDirectory(), fileNameLogs);
+        private static StreamWriter writer = new StreamWriter(filePathLogs, true) { AutoFlush = true };        
+        private static String timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
         /// <summary>
         /// Loads data from .csv file and creates a collection of <see cref="GroupRow"/> objects.
         /// </summary>
@@ -57,10 +65,6 @@ namespace Geotab.SDK.ImportGroups
         }
         
         
-        private static String timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-        private static String fileNameLogs = $"logs_{timestamp}.csv";
-        private static String filePathLogs = Path.Combine(Directory.GetCurrentDirectory(), fileNameLogs);
-        private static StreamWriter writer = new StreamWriter(filePathLogs, true) { AutoFlush = true };
         /// <summary>
         /// This is a Geotab API console example of importing groups from a CSV file.
         /// 1) Process command line arguments: Server, Database, Username, Password, Input File and load CSV file.
@@ -111,13 +115,6 @@ namespace Geotab.SDK.ImportGroups
                     Console.WriteLine($"Could not load CSV file: {exception.Message}");
                     return;
                 }
-
-                // Creates a log file
-                // string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-                // string fileNameLogs = $"logs_{timestamp}.csv";
-                // string filePathLogs = Path.Combine(Directory.GetCurrentDirectory(), fileNameLogs);
-
-                // File.Create(filePathLogs).Close();
 
                 // Create Geotab API object
                 API api = new API(username, password, null, database, server);
@@ -208,7 +205,7 @@ namespace Geotab.SDK.ImportGroups
                     }
                     catch (Exception exception)
                     {
-                        // Catch exceptions here so we can continue trying to add nodes.
+                        // Catch exceptions here so we can continue trying to add nodes.
                         Console.WriteLine($"Could not add {row.GroupName}: {exception.Message}");
                         AddingLog($"Could not add {row.GroupName}: {exception.Message}");
                     }
