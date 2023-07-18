@@ -63,8 +63,9 @@ namespace Geotab.SDK.DataFeed
                                 bool federation = string.IsNullOrEmpty(database);
                                 Worker worker = new DatabaseWorker(user, password, database, server, gpsToken, statusToken, faultToken, tripToken, exceptionToken, path);
                                 var cancellationToken = new CancellationTokenSource();
+                                // This task should run async
                                 Task task = Task.Run(async () => await worker.DoWorkAsync(continuous), cancellationToken.Token);
-                                if (continuous && Console.ReadLine() != null)
+                                if (continuous)
                                 {
                                     worker.RequestStop();
                                     cancellationToken.Cancel();
