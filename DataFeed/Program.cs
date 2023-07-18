@@ -65,12 +65,6 @@ namespace Geotab.SDK.DataFeed
                                 var cancellationToken = new CancellationTokenSource();
                                 // This task should run async
                                 Task task = Task.Run(async () => await worker.DoWorkAsync(continuous), cancellationToken.Token);
-                                // console.readline checks if there are incoming values. 
-                                // if (continuous && Console.ReadLine() != null)
-                                // {
-                                //     worker.RequestStop();
-                                //     cancellationToken.Cancel();
-                                // }
                                 if (continuous)
                                 {
                                     worker.RequestStop();
