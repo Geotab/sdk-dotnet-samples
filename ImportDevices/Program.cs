@@ -14,6 +14,7 @@ namespace Geotab.SDK.ImportDevices
     /// </summary>
     static class Program
     {
+
         /// <summary>
         /// Searches for and returns a group from a flat list of groups.
         /// </summary>
@@ -39,15 +40,16 @@ namespace Geotab.SDK.ImportDevices
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
                 {
+
                     // Consider lines starting with # to be comments
                     if (line.StartsWith("#", StringComparison.Ordinal))
                     {
                         count++;
                         continue;
                     }
-
                     try
                     {
+
                         // Create DeviceRow from line columns
                         DeviceRow device = new DeviceRow();
                         string[] columns = line.Split(',');
@@ -80,6 +82,7 @@ namespace Geotab.SDK.ImportDevices
         {
             try
             {
+
                 // 1. Process command line arguments
                 if (args.Length != 5)
                 {
@@ -104,7 +107,7 @@ namespace Geotab.SDK.ImportDevices
                 string password = args[3];
                 string fileName = args[4];
 
-                // 5. Load DeviceRow collection from the given .csv file
+                // 2. Load DeviceRow collection from the given .csv file
                 Console.WriteLine("Loading .csv file...");
                 List<DeviceRow> deviceRows;
                 try
@@ -117,10 +120,10 @@ namespace Geotab.SDK.ImportDevices
                     return;
                 }
 
-                // 2. Create Geotab API object
+                // 3. Create Geotab API object
                 API api = new API(username, password, null, database, server);
 
-                // 3. Authenticate
+                // 4. Authenticate
                 Console.WriteLine("Authenticating...");
                 try
                 {
@@ -131,14 +134,13 @@ namespace Geotab.SDK.ImportDevices
                     Console.WriteLine($"Could not authenticate: \n{ex.Message}");
                 }
 
-
-                // 6. Start import
+                // 5. Start import
                 Console.WriteLine("Importing...");
 
                 IList<Group> groups = await api.CallAsync<IList<Group>>("Get", typeof(Group));
                 List<Group> assetTypeGroups = GetAllChildrenOfGroup("GroupAssetTypeId", groups);
 
-                // 7. Iterate through each row, validate the entries, and add them if the validation passes.
+                // 6. Iterate through each row, validate the entries, and add them if the validation passes.
                 foreach (DeviceRow device in deviceRows)
                 {
                     bool deviceRejected = false;
@@ -148,9 +150,7 @@ namespace Geotab.SDK.ImportDevices
                     // In the .csv file if a device belongs to multiple nodes we separate with a pipe character.
                     string[] groupIds = (device.NodeId ?? "").Split('|');
 
-                    // Verify that there is one asset type is assigned to the device.
-                    // Assets are restricted to one asset type (although the API call does not enforce this).
-                    // If multiple asset types are detected, the user will be prompted in the database UI to remove all except one.
+                    // Verify that there is one asset type is assigned to the device. Assets are restricted to one asset type (although the API call does not enforce this).
                     if (AssetTypeCount(groupIds, assetTypeGroups) < 1)
                     {
                         Console.WriteLine($"Rejected: '{device.Description}'. Does not have asset type.");
@@ -167,9 +167,11 @@ namespace Geotab.SDK.ImportDevices
                         // Iterate through the group names and try to assign each group to the device looking it up from the allNodes collection.
                         foreach (string groupId in groupIds)
                         {
+
                             // No need to add GroupCompanyId. Asset Types are children of GroupCompanyId and will cause an error if added
                             if (groupId != "GroupCompanyId")
                             {
+
                                 // Verify that the groups specified in the CSV file exist in the database and that the current user has access to them.
                                 Group group = GetGroup(groupId.Trim(), groups);
                                 if (group == null)
@@ -178,6 +180,7 @@ namespace Geotab.SDK.ImportDevices
                                     deviceRejected = true;
                                     break;
                                 }
+
                                 // Add group to device nodes collection.
                                 newDeviceGroups.Add(group);
                             }
