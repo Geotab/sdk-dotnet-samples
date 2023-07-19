@@ -13,9 +13,9 @@ namespace Geotab.SDK.ImportDevices
         public string Description;
 
         /// <summary>
-        /// The node name
+        /// The node id
         /// </summary>
-        public string NodeName;
+        public string NodeId;
 
         /// <summary>
         /// Gets or sets the serial number.
