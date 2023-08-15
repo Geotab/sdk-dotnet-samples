@@ -48,7 +48,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 };
 
                 // Set the beginning of the time interval. It will be extended to the nearest hour. For example, 4:20:00 will become 4:00:00.
-                DateTime fromDate = new DateTime(2023, 8, 1, 4, 0, 0, DateTimeKind.Utc);
+                DateTime fromDate = new DateTime(2023, 8, 1, 5, 0, 0, DateTimeKind.Utc);
 
                 // Set the end of the time interval. It will be extended to the nearest hour. For example, 3:45:00 will become 4:00:00.
                 DateTime toDate = new DateTime(2023, 8, 2, 5, 0, 0, DateTimeKind.Utc);
@@ -101,9 +101,11 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 {
                     Console.WriteLine($"Fuel usage for {fuelUsageByDevice.Count} devices ready.");
                 }
+                // Print fuel tax detail results in terminal.
                 foreach(var detail in details){
                     Console.WriteLine($"Device: {detail.Device} | Driver: {detail.Driver} | EnterTime: {detail.EnterTime} | EnterOdometer: {detail.EnterOdometer} | ExitTime: {detail.ExitTime} | ExitOdometer: {detail.ExitOdometer}");
                 }
+                // Write and save the results in csv file based on the user's answer.
                 Console.WriteLine("Do you want to download .csv file? (yes/no)");
                 string name = Console.ReadLine();
                 if (name.ToLower() == "yes")
