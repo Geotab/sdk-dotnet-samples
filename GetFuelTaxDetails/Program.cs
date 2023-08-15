@@ -110,16 +110,12 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 string name = Console.ReadLine();
                 if (name.ToLower() == "yes")
                 {
-                    string filePath = "sample.csv";
-                    WriteDataToCsv(filePath, details);
-
+                    string fileName = "sample.csv";
                     string downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
-                    string downloadFilePath = Path.Combine(downloadFolderPath, Path.GetFileName(filePath));
-
+                    string downloadFilePath = Path.Combine(downloadFolderPath, Path.GetFileName(fileName));
                     try
                     {
-                        File.Copy(filePath, downloadFilePath, true);
-
+                        WriteDataToCsv(downloadFilePath, details);
                         Console.WriteLine($"CSV file created and downloaded to: {downloadFilePath}");
                     }
                     catch (Exception ex)
@@ -370,13 +366,13 @@ namespace Geotab.SDK.GetFuelTaxDetails
         /// <summary>
         /// Write fuel details data to csv file.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
+        /// <param name="downloadFilePath">The download file path.</param>
         /// <param name="details">The list of FuelTaxDetail objects.</param>
-        static void WriteDataToCsv(string filePath, List<FuelTaxDetail> details)
+        static void WriteDataToCsv(string downloadFilePath, List<FuelTaxDetail> details)
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(filePath))
+                using (StreamWriter writer = new StreamWriter(downloadFilePath))
                 {
                     writer.WriteLine("Driver, Device, EnterTime, EnterOdometer, ExitTime, ExitOdometer");
                     foreach (FuelTaxDetail detail in details)
