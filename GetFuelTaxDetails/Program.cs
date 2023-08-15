@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Geotab.Checkmate;
@@ -47,10 +48,10 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 };
 
                 // Set the beginning of the time interval. It will be extended to the nearest hour. For example, 4:20:00 will become 4:00:00.
-                DateTime fromDate = new DateTime(2023, 4, 1, 5, 0, 0, DateTimeKind.Utc);
+                DateTime fromDate = new DateTime(2023, 8, 1, 4, 0, 0, DateTimeKind.Utc);
 
                 // Set the end of the time interval. It will be extended to the nearest hour. For example, 3:45:00 will become 4:00:00.
-                DateTime toDate = new DateTime(2023, 4, 30, 5, 0, 0, DateTimeKind.Utc);
+                DateTime toDate = new DateTime(2023, 8, 2, 5, 0, 0, DateTimeKind.Utc);
 
                 // Create the Geotab API object.
                 // A database can be moved to another server without notice.
@@ -99,6 +100,30 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 if (options.FuelUsage)
                 {
                     Console.WriteLine($"Fuel usage for {fuelUsageByDevice.Count} devices ready.");
+                }
+                foreach(var detail in details){
+                    Console.WriteLine($"Device: {detail.Device} | Driver: {detail.Driver} | EnterTime: {detail.EnterTime} | EnterOdometer: {detail.EnterOdometer} | ExitTime: {detail.ExitTime} | ExitOdometer: {detail.ExitOdometer}");
+                }
+                Console.WriteLine("Do you want to download .csv file? (yes/no)");
+                string name = Console.ReadLine();
+                if (name.ToLower() == "yes")
+                {
+                    string filePath = "sample.csv";
+                    WriteDataToCsv(filePath, details);
+
+                    string downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
+                    string downloadFilePath = Path.Combine(downloadFolderPath, Path.GetFileName(filePath));
+
+                    try
+                    {
+                        File.Copy(filePath, downloadFilePath, true);
+
+                        Console.WriteLine($"CSV file created and downloaded to: {downloadFilePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"An error occurred while downloading the file: {ex.Message}");
+                    }
                 }
             }
             catch (InvalidUserException)
@@ -338,6 +363,32 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 }
             }
             return fuelUsageByJurisdiction;
+        }
+
+        /// <summary>
+        /// Write fuel details data to csv file.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="details">The list of FuelTaxDetail objects.</param>
+        static void WriteDataToCsv(string filePath, List<FuelTaxDetail> details)
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(filePath))
+                {
+                    writer.WriteLine("Driver, Device, EnterTime, EnterOdometer, ExitTime, ExitOdometer");
+                    foreach (FuelTaxDetail detail in details)
+                    {
+                        writer.WriteLine($"{detail.Driver}, {detail.Device}, {detail.EnterTime}, {detail.EnterOdometer}, {detail.ExitTime}, {detail.ExitOdometer}");
+                    }
+                }
+
+                Console.WriteLine("Data written to CSV file.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while writing to the file: {ex.Message}");
+            }
         }
 
         /// <summary>
