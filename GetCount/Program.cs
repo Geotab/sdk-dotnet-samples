@@ -89,7 +89,7 @@ namespace Geotab.SDK.GetCount
                     return;
                 }
 
-                // Make a call through the Geotab API for the count of any entity that is supported. GetCountOf is a Generic method, meaning it can be called
+                // Make a call through the Geotab API for the count of zones. GetCountOf is a Generic method, meaning it can be called
                 // against many different object types. So we specify the type we want to get the count of as well as the method name.
                 var zoneCount = (await api.CallAsync<int?>("GetCountOf",  typeof(Zone))).Value;
 
