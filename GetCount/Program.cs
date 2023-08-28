@@ -13,12 +13,12 @@ namespace Geotab.SDK.GetCount
     static class Program
     {
         /// <summary>
-        /// This is a Geotab API console example to count any entities in your database.
+        /// This is a Geotab API console example to count active vehicles, trailers, and zones in your database.
         ///
         /// Steps:
         /// 1) Create API from command line arguments.
         /// 2) Authenticate the user.
-        /// 3) Get the count of entities.
+        /// 3) Get the count of active vehicles, trailers, and zones.
         ///
         /// A complete Geotab API object and method reference is available on the Geotab Developer page.
         /// </summary>
@@ -32,19 +32,18 @@ namespace Geotab.SDK.GetCount
                 Console.WriteLine(" Geotab SDK");
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-                if (args.Length != 5)
+                if (args.Length != 4)
                 {
                     Console.WriteLine();
                     Console.WriteLine(" Command line parameters:");
-                    Console.WriteLine(" dotnet run <server> <database> <username> <password> <countObject>");
+                    Console.WriteLine(" dotnet run <server> <database> <username> <password>");
                     Console.WriteLine();
-                    Console.WriteLine(" Example: dotnet run server database username password countObject");
+                    Console.WriteLine(" Example: dotnet run server database username password");
                     Console.WriteLine();
                     Console.WriteLine(" server   - Server host name (Example: my.geotab.com)");
                     Console.WriteLine(" database - Database name (Example: G560)");
                     Console.WriteLine(" username - Geotab user name");
                     Console.WriteLine(" password - Geotab password");
-                    Console.WriteLine(" countObject - Geotab object to be counted (Example : Zone)");
 
                     return;
                 }
@@ -54,7 +53,6 @@ namespace Geotab.SDK.GetCount
                 var database = args[1];
                 var username = args[2];
                 var password = args[3];
-                var inputtedEntity = args[4];
 
                 Console.WriteLine();
                 Console.WriteLine(" Creating API...");
@@ -91,16 +89,11 @@ namespace Geotab.SDK.GetCount
                     return;
                 }
 
-                //convert the provided string representation of the object to the type of object
-                Type countEntityType =  Type.GetType($"Geotab.Checkmate.ObjectModel.{inputtedEntity},Geotab.Checkmate.ObjectModel");
-
-                Console.WriteLine($" Counting {inputtedEntity}s/Vehicles/Trailers...");
-
                 // Make a call through the Geotab API for the count of any entity that is supported. GetCountOf is a Generic method, meaning it can be called
                 // against many different object types. So we specify the type we want to get the count of as well as the method name.
-                var entityCount = (await api.CallAsync<int?>("GetCountOf",  countEntityType)).Value;
+                var zoneCount = (await api.CallAsync<int?>("GetCountOf",  typeof(Zone))).Value;
 
-                //Create a DeviceSearch object for active devices and filtering only assets assigned to the Vehicle group
+                //Create a DeviceSearch object for active devices and filtering only active assets assigned to the Vehicle group
                 DeviceSearch deviceSearch = new DeviceSearch
                 {
                     FromDate = DateTime.UtcNow,
@@ -113,9 +106,10 @@ namespace Geotab.SDK.GetCount
                     }
                 };
 
-                var vehicleCount = (await api.CallAsync<IList<Device>>("Get", typeof(Device), new { search = deviceSearch })).Count;
 
+                var vehicleCount = (await api.CallAsync<int?>("GetCountOf",  typeof(Device), new {search = deviceSearch })).Value;
 
+                //Create a DeviceSearch object for devices and filtering only assets assigned to the Trailer group
                 deviceSearch = new DeviceSearch
                 {
                     Groups = new List<GroupSearch>
@@ -127,22 +121,18 @@ namespace Geotab.SDK.GetCount
                     }
                 };
 
-                var trailerCount = (await api.CallAsync<IList<Device>>("Get", typeof(Device), new { search = deviceSearch })).Count;
+                var trailerCount = (await api.CallAsync<int?>("GetCountOf",  typeof(Device), new {search = deviceSearch })).Value;
+                
 
                 Console.WriteLine();
-                Console.WriteLine($" Total {inputtedEntity}s : {entityCount}");
                 Console.WriteLine($" Total Active Vehicles : {vehicleCount}");
                 Console.WriteLine($" Total Trailers : {trailerCount}");
+                Console.WriteLine($" Total Zoness : {zoneCount}");
             }catch(InvalidPermissionsException)
             {
                 Console.WriteLine(" User does not have valid permissions");
                 return;
-            }catch(MissingMethodException)
-            {
-                Console.WriteLine(" Incorrect Object to count");
-                return;
-            }
-            catch (Exception exception)
+            }catch (Exception exception)
             {
                 Console.WriteLine($" Exception: {exception.Message}\n\n{exception.StackTrace}");
             }
