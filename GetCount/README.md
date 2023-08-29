@@ -1,12 +1,13 @@
 # Get Count
 
- This example demonstrates how to get a count the number of devices in a database using the MyGeotab API.
+ This example demonstrates how to get a count the number of active vehicles, trailers, and zones in a database using the MyGeotab API.
+ This examples also demonstrates how to use searches using the MyGeptab API.
 
 Steps:
 
 1. Create API from command line arguments.
 1. Authenticate the user.
-1. Get the count of devices.
+1. Get the count of active vehicles, trailers, and zones.
 
 ## Prerequisites
 
