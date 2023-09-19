@@ -11,20 +11,6 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="8.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="DotNetOpenAuth">
-      <HintPath>DotNetOpenAuth.dll</HintPath>
-    </Reference>
-    <Reference Include="Google.Apis">
-      <HintPath>Google.Apis.dll</HintPath>
-    </Reference>
-    <Reference Include="Google.Apis.Authentication.OAuth2">
-      <HintPath>Google.Apis.Authentication.OAuth2.dll</HintPath>
-    </Reference>
-    <Reference Include="Google.Apis.Bigquery.v2">
-      <HintPath>Google.Apis.Bigquery.v2.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="11.0.0" />
   </ItemGroup>
 </Project>

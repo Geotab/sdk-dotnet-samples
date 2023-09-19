@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System;
 using Thread = System.Threading.Thread;
 
 namespace Geotab.SDK.DataFeed
@@ -17,7 +18,9 @@ namespace Geotab.SDK.DataFeed
         /// <param name="path">The path.</param>
         internal Worker(string path)
         {
+            
             this.path = path;
+            
         }
 
         /// <summary>
@@ -26,12 +29,12 @@ namespace Geotab.SDK.DataFeed
         /// <param name="results">The results.</param>
         public async Task DisplayFeedResultsAsync(FeedResultData results)
         {
-            // Output to console
-            // new FeedToConsole(results.GpsRecords, results.StatusData, results.FaultData).Run();
+            
             // Optionally we can output to csv or google doc:
             new FeedToCsv(path, results.GpsRecords, results.StatusData, results.FaultData, results.Trips, results.ExceptionEvents).Run();
-
-            // new FeedToBigquery(path).Run();
+            // Displays feed to console
+            new FeedToConsole(results.GpsRecords,results.StatusData,results.FaultData).Run();
+                        
             await Task.Delay(1000);
         }
 

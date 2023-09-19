@@ -98,6 +98,7 @@ namespace Geotab.SDK.DataFeed
         /// </summary>
         public void Run()
         {
+            
             if (gpsRecords.Count > 0)
             {
                 WriteData(gpsRecords);
@@ -109,6 +110,10 @@ namespace Geotab.SDK.DataFeed
             if (faultRecords.Count > 0)
             {
                 WriteData(faultRecords);
+            }
+            if ((faultRecords.Count == 0)&& (statusRecords.Count == 0) && (gpsRecords.Count == 0))
+            {
+                WriteError();
             }
         }
 
@@ -202,6 +207,9 @@ namespace Geotab.SDK.DataFeed
             Console.WriteLine(sb.ToString().TrimEnd(trimChars));
         }
 
+        void WriteError(){
+            Console.WriteLine("No data found");
+        }
         void WriteData<T>(IList<T> entities)
                                             where T : class
         {

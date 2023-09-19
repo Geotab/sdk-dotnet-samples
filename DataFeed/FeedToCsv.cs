@@ -12,6 +12,7 @@ namespace Geotab.SDK.DataFeed
 {
     /// <summary>
     /// A feed that produces csv data
+    /// Saves each type of data as a separate CSV file to the specified directory
     /// </summary>
     class FeedToCsv
     {
