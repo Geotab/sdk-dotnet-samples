@@ -3,20 +3,5 @@
   "dgSpecHash": "WIsKAbg2mOfMDSvAznTPO6+EV5rwZ6qN7/AnU1b48V95//6u0AsgxgA5go8lGtvNhGMgB6D9aO1G90GzDzrGvg==",
   "success": true,
   "projectFilePath": "/home/dylanjaramillo/Desktop/csharp/sdk-dotnet-samples/DataFeed/DataFeed.csproj",
-  "expectedPackageFiles": [
-    "/home/dylanjaramillo/.nuget/packages/geotab.checkmate.objectmodel/11.0.0/geotab.checkmate.objectmodel.11.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/microsoft.bcl.asyncinterfaces/6.0.0/microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/microsoft.netcore.platforms/5.0.0/microsoft.netcore.platforms.5.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.collections.immutable/7.0.0/system.collections.immutable.7.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.formats.asn1/7.0.0/system.formats.asn1.7.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.io.filesystem.accesscontrol/5.0.0/system.io.filesystem.accesscontrol.5.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.linq.async/6.0.1/system.linq.async.6.0.1.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.reflection.emit.lightweight/4.7.0/system.reflection.emit.lightweight.4.7.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.security.accesscontrol/5.0.0/system.security.accesscontrol.5.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.security.principal.windows/5.0.0/system.security.principal.windows.5.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.text.encodings.web/7.0.0/system.text.encodings.web.7.0.0.nupkg.sha512",
-    "/home/dylanjaramillo/.nuget/packages/system.text.json/7.0.2/system.text.json.7.0.2.nupkg.sha512"
-  ],
   "logs": []
 }
