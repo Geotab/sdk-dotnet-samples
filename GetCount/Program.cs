@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Exception = System.Exception;
@@ -12,12 +13,12 @@ namespace Geotab.SDK.GetCount
     static class Program
     {
         /// <summary>
-        /// This is a Geotab API console example to count the devices in your database.
+        /// This is a Geotab API console example to count active vehicles, trailers, and zones in your database.
         ///
         /// Steps:
         /// 1) Create API from command line arguments.
         /// 2) Authenticate the user.
-        /// 3) Get the count of devices.
+        /// 3) Get the count of active vehicles, trailers, and zones.
         ///
         /// A complete Geotab API object and method reference is available on the Geotab Developer page.
         /// </summary>
@@ -88,16 +89,50 @@ namespace Geotab.SDK.GetCount
                     return;
                 }
 
-                Console.WriteLine(" Counting devices...");
-
-                // Make a call through the Geotab API for the count of devices. GetCountOf is a Generic method, meaning it can be called
+                // Make a call through the Geotab API for the count of zones. GetCountOf is a Generic method, meaning it can be called
                 // against many different object types. So we specify the type we want to get the count of as well as the method name.
-                var deviceCount = (await api.CallAsync<int?>("GetCountOf", typeof(Device))).Value;
+                var zoneCount = (await api.CallAsync<int?>("GetCountOf",  typeof(Zone))).Value;
+
+                //Create a DeviceSearch object for active devices and filtering only active assets assigned to the Vehicle group
+                DeviceSearch deviceSearch = new DeviceSearch
+                {
+                    FromDate = DateTime.UtcNow,
+                    Groups = new List<GroupSearch>
+                    {
+                        new GroupSearch
+                        {
+                            Id = Id.Create("GroupVehicleId")
+                        }
+                    }
+                };
+
+
+                var vehicleCount = (await api.CallAsync<int?>("GetCountOf",  typeof(Device), new {search = deviceSearch })).Value;
+
+                //Create a DeviceSearch object for devices and filtering only assets assigned to the Trailer group
+                deviceSearch = new DeviceSearch
+                {
+                    Groups = new List<GroupSearch>
+                    {
+                        new GroupSearch
+                        {
+                            Id = Id.Create("GroupTrailerId")
+                        }
+                    }
+                };
+
+                var trailerCount = (await api.CallAsync<int?>("GetCountOf",  typeof(Device), new {search = deviceSearch })).Value;
+                
 
                 Console.WriteLine();
-                Console.WriteLine($" Total devices: {deviceCount}");
-            }
-            catch (Exception exception)
+                Console.WriteLine($" Total Active Vehicles : {vehicleCount}");
+                Console.WriteLine($" Total Trailers : {trailerCount}");
+                Console.WriteLine($" Total Zoness : {zoneCount}");
+            }catch(InvalidPermissionsException)
+            {
+                Console.WriteLine(" User does not have valid permissions");
+                return;
+            }catch (Exception exception)
             {
                 Console.WriteLine($" Exception: {exception.Message}\n\n{exception.StackTrace}");
             }

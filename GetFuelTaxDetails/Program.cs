@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Geotab.Checkmate;
@@ -47,14 +48,12 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 };
 
                 // Set the beginning of the time interval. It will be extended to the nearest hour. For example, 4:20:00 will become 4:00:00.
-
-                DateTime fromDate = new DateTime(2022, 1, 1, 5, 0, 0, DateTimeKind.Utc);
+                DateTime fromDate = new DateTime(2023, 8, 1, 5, 0, 0, DateTimeKind.Utc);
 
                 // Set the end of the time interval. It will be extended to the nearest hour. For example, 3:45:00 will become 4:00:00.
-                DateTime toDate = new DateTime(2022, 2, 1, 5, 0, 0, DateTimeKind.Utc);
+                DateTime toDate = new DateTime(2023, 8, 2, 5, 0, 0, DateTimeKind.Utc);
 
                 // Create the Geotab API object.
-                // It is important to create this object with the base "Federation" server (my.geotab.com) NOT the specific server (e.g. my3.geotab.com).
                 // A database can be moved to another server without notice.
                 Console.WriteLine();
                 Console.WriteLine("Creating API...");
@@ -63,7 +62,8 @@ namespace Geotab.SDK.GetFuelTaxDetails
 
                 // The example code will retrieve fuel tax details for one device at a time. For smaller fleets, it is feasible to retrieve the details for all devices by removing the device search from the search object below.
                 Console.WriteLine("Retrieving devices...");
-                IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device));
+                Id groupVehicleId = KnownId.GroupVehicleId;
+                IList<Device> devices = await api.CallAsync<IList<Device>>("Get", typeof(Device), new { search = new DeviceSearch { Groups = new List<GroupSearch> { new GroupSearch(groupVehicleId) }} } );
 
                 // Get the fuel tax details restricted to the time interval, grouped by device, and sorted by enter time.
                 Console.WriteLine("Retrieving fuel tax details...");
@@ -100,6 +100,28 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 if (options.FuelUsage)
                 {
                     Console.WriteLine($"Fuel usage for {fuelUsageByDevice.Count} devices ready.");
+                }
+                // Print fuel tax detail results in terminal.
+                foreach(var detail in details){
+                    Console.WriteLine($"Device: {detail.Device} | Driver: {detail.Driver} | EnterTime: {detail.EnterTime} | EnterOdometer: {detail.EnterOdometer} | ExitTime: {detail.ExitTime} | ExitOdometer: {detail.ExitOdometer}");
+                }
+                // Write and save the results in csv file based on the user's answer.
+                Console.WriteLine("Do you want to download .csv file? (yes/no)");
+                string name = Console.ReadLine();
+                if (name.ToLower() == "yes")
+                {
+                    string fileName = "sample.csv";
+                    string downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
+                    string downloadFilePath = Path.Combine(downloadFolderPath, Path.GetFileName(fileName));
+                    try
+                    {
+                        WriteDataToCsv(downloadFilePath, details);
+                        Console.WriteLine($"CSV file created and downloaded to: {downloadFilePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"An error occurred while downloading the file: {ex.Message}");
+                    }
                 }
             }
             catch (InvalidUserException)
@@ -181,6 +203,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                     detail.ExitGpsOdometer = lastDetail.ExitGpsOdometer;
                     detail.ExitLatitude = lastDetail.ExitLatitude;
                     detail.ExitLongitude = lastDetail.ExitLongitude;
+                    detail.IsExitOdometerInterpolated = lastDetail.IsExitOdometerInterpolated;
                     for (var detailIndex = 1; detailIndex < detailCount; detailIndex++)
                     {
                         var nextDetail = group[detailIndex];
@@ -190,6 +213,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                             detail.HourlyGpsOdometer.Add(nextDetail.EnterGpsOdometer);
                             detail.HourlyLatitude.Add(nextDetail.EnterLatitude);
                             detail.HourlyLongitude.Add(nextDetail.EnterLongitude);
+                            detail.HourlyIsOdometerInterpolated.Add(nextDetail.IsEnterOdometerInterpolated);
                         }
                         for (int hourIndex = 0; hourIndex < nextDetail.HourlyOdometer.Count; hourIndex++)
                         {
@@ -197,6 +221,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                             detail.HourlyGpsOdometer.Add(nextDetail.HourlyGpsOdometer[hourIndex]);
                             detail.HourlyLatitude.Add(nextDetail.HourlyLatitude[hourIndex]);
                             detail.HourlyLongitude.Add(nextDetail.HourlyLongitude[hourIndex]);
+                            detail.HourlyIsOdometerInterpolated.Add(nextDetail.HourlyIsOdometerInterpolated[hourIndex]);
                         }
                     }
                 }
@@ -336,6 +361,32 @@ namespace Geotab.SDK.GetFuelTaxDetails
                 }
             }
             return fuelUsageByJurisdiction;
+        }
+
+        /// <summary>
+        /// Write fuel details data to csv file.
+        /// </summary>
+        /// <param name="downloadFilePath">The download file path.</param>
+        /// <param name="details">The list of FuelTaxDetail objects.</param>
+        static void WriteDataToCsv(string downloadFilePath, List<FuelTaxDetail> details)
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(downloadFilePath))
+                {
+                    writer.WriteLine("Driver, Device, EnterTime, EnterOdometer, ExitTime, ExitOdometer");
+                    foreach (FuelTaxDetail detail in details)
+                    {
+                        writer.WriteLine($"{detail.Driver}, {detail.Device}, {detail.EnterTime}, {detail.EnterOdometer}, {detail.ExitTime}, {detail.ExitOdometer}");
+                    }
+                }
+
+                Console.WriteLine("Data written to CSV file.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while writing to the file: {ex.Message}");
+            }
         }
 
         /// <summary>

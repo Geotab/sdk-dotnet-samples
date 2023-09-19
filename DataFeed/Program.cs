@@ -69,6 +69,10 @@ namespace Geotab.SDK.DataFeed
                                 Task.WaitAll(tasks);
 
                                 if (continuous && Console.ReadLine() != null)
+                                // This task should run async
+                                Task task = Task.Run(async () => await worker.DoWorkAsync(continuous), cancellationToken.Token);
+                                if (continuous)
+
                                 {
                                     worker.RequestStop();
                                     cancellationToken.Cancel();

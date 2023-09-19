@@ -6,7 +6,7 @@ Steps:
 
 1. Create API from command line arguments.
 1. Authenticate the user.
-1. Iterate trhough a list of devices.
+1. Iterate through a list of devices.
 1. Retrieve fuel tax details for each device over a given time interval.
 1. Trim each detail to the time interval.
 
