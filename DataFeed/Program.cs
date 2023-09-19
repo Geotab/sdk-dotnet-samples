@@ -47,15 +47,15 @@ namespace Geotab.SDK.DataFeed
                             {
                                 string database = index >= 0 && index < args.Length - 1 ? args[index + 1] : null;
                                 index = arguments.IndexOf("--gt");
-                                long? gpsToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? gpsToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--st");
-                                long? statusToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? statusToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--ft");
-                                long? faultToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? faultToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--tt");
-                                long? tripToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? tripToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--et");
-                                long? exceptionToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? exceptionToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--f");
                                 string path = index >= 0 && index < args.Length - 1 ? args[index + 1] : Environment.CurrentDirectory;
                                 bool continuous = arguments.IndexOf("--c") >= 0;
