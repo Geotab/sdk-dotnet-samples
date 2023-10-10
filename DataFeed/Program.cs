@@ -4,7 +4,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Thread = System.Threading.Thread;
 
 namespace Geotab.SDK.DataFeed
 {
@@ -48,28 +47,37 @@ namespace Geotab.SDK.DataFeed
                             {
                                 string database = index >= 0 && index < args.Length - 1 ? args[index + 1] : null;
                                 index = arguments.IndexOf("--gt");
-                                long? gpsToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? gpsToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--st");
-                                long? statusToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? statusToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--ft");
-                                long? faultToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? faultToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--tt");
-                                long? tripToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? tripToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--et");
-                                long? exceptionToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1]) : null;
+                                long? exceptionToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--f");
-                                string path = index >= 0 && index < args.Length - 1 ? args[index + 1] : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                                string path = index >= 0 && index < args.Length - 1 ? args[index + 1] : Environment.CurrentDirectory;
                                 bool continuous = arguments.IndexOf("--c") >= 0;
                                 bool federation = string.IsNullOrEmpty(database);
                                 Worker worker = new DatabaseWorker(user, password, database, server, gpsToken, statusToken, faultToken, tripToken, exceptionToken, path);
                                 var cancellationToken = new CancellationTokenSource();
+                                
+                                Task[] tasks = new Task[1];
+                                tasks[0] = Task.Run(async () => await worker.DoWorkAsync(continuous));
+
+                                Task.WaitAll(tasks);
+
+                                if (continuous && Console.ReadLine() != null)
                                 // This task should run async
                                 Task task = Task.Run(async () => await worker.DoWorkAsync(continuous), cancellationToken.Token);
                                 if (continuous)
+
                                 {
                                     worker.RequestStop();
                                     cancellationToken.Cancel();
                                 }
+                        
                                 Console.WriteLine();
                                 Console.WriteLine("******************************************************");
                                 Console.WriteLine("Finished receiving data from " + server + (federation ? "" : "/" + database));
@@ -88,11 +96,11 @@ namespace Geotab.SDK.DataFeed
             Console.WriteLine("--d  The Database");
             Console.WriteLine("--u  The User");
             Console.WriteLine("--p  The Password");
-            Console.WriteLine("--gt The last known gps data token");
-            Console.WriteLine("--st The last known status data token");
-            Console.WriteLine("--ft The last known fault data token");
-            Console.WriteLine("--tt The last known trip token");
-            Console.WriteLine("--et The last known exception token");
+            Console.WriteLine("--gt The last known gps data Version");
+            Console.WriteLine("--st The last known status data Version");
+            Console.WriteLine("--ft The last known fault data Version");
+            Console.WriteLine("--tt The last known trip Version");
+            Console.WriteLine("--et The last known exception Version");
             Console.WriteLine("--f  The folder to save any output files to, if applicable. Defaults to the current directory.");
             Console.WriteLine("--c  Run the feed continuously.");
             Console.ReadLine();

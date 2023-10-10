@@ -26,6 +26,7 @@ The Geotab Data Feed application connects to the MyGeotab cloud hosting services
 > dotnet run
 ```
 
+
 The application will bring up the following console:
 
 ```shell
@@ -34,11 +35,11 @@ The application will bring up the following console:
 --d  The Database
 --u  The User
 --p  The Password
---gt [optional] The last known gps data token
---st [optional] The last known status data token
---ft [optional] The last known fault data token
---tt [optional] The last known trip token
---et [optional] The last known exception token
+--gt [optional] The last known gps data version
+--st [optional] The last known status data version
+--ft [optional] The last known fault data version
+--tt [optional] The last known trip version
+--et [optional] The last known exception version
 --f  [optional] The folder to save any output files to, if applicable. Defaults to the current directory.
 --c  [optional] Run the feed continuously. Defaults to false.
 ```
@@ -46,14 +47,14 @@ The application will bring up the following console:
 Example usage:
 
 ```shell
-> dotnet run --s "my.geotab.com" --d "database" --u "user@email.com" --p "password" --c
+> dotnet run --s "my.geotab.com" --d "database" --u "user@email.com" --p "password" --gt 0000000000000000 --st 0000000000000000
 ```
 
-The options above are the inputs that the feed example can take. A server, database, user and password must be supplied in order for the feed to run. Optionally a gps data token, status data token, fault data token, trip token and/or exception token can be provided to start the feed at a particular token version ("nnn" should be replaced with the known token). Finally the feed can be instructed to run continuously or only one time.
+The options above are the inputs that the feed example can take. A server, database, user and password must be supplied in order for the feed to run. Optionally a gps data version, status data version, fault data version, trip version and/or exception version can be provided to start the feed at a particular version ("nnn" should be replaced with the known version). Finally the feed can be instructed to run continuously or only one time.
 
-By default the feed will output its results to a CSV file in the location specified by the -f flag above. If no location is provided the CSV file will be placed in the same directory that DataFeed.dll is located.
+By default the feed will output its results to a CSV file in the location specified by the --f flag above. If no location is provided the CSV file will be placed in the same directory that DataFeed.cs is located.
 
-The feed example contains numerous other examples of what can be done with the feed output, for example writing the data to the console or automatically uploading it to Google BigQuery. Developers are encouraged to take a look at the examples in order to understand how the options available to them and how to best to integrate the feed data into their existing systems.
+The feed example contains numerous other examples of what can be done with the feed output, for example writing the data to the console. Developers are encouraged to take a look at the examples in order to understand how the options available to them and how to best to integrate the feed data into their existing systems.
 
 ## Feed output
 
@@ -74,6 +75,7 @@ The feed example contains numerous other examples of what can be done with the f
 | **#** | **Field Name** | **Description** | **Example** |
 | --- | --- | --- | --- |
 | 1 | Vehicle Serial Number | The unique serial number printed on the GO device | GT8010000001 |
+
 | 2 | Date | The date and time in UTC for the engine diagnostic reading. | 12/12/21 09:43:01 |
 | 3 | Diagnostic Name | The engine diagnostic description in English | Cranking Voltage |
 | 4 | Source Name | An indication what the source of this status data reading is. | J1938 or J1708 or Geotab Go etc. |

@@ -28,6 +28,8 @@ namespace Geotab.SDK.DataFeed
         {
             feedParameters = new FeedParameters(gpsToken, statusToken, faultToken, tripToken, exceptionToken);
             feedService = new FeedProcessor(server, database, user, password);
+            
+
         }
 
         /// <summary>
@@ -37,6 +39,7 @@ namespace Geotab.SDK.DataFeed
         public async override Task WorkActionAsync()
         {
             await DisplayFeedResultsAsync(await feedService.GetAsync(feedParameters));
+            
         }
     }
 }
