@@ -10,12 +10,17 @@ namespace Geotab.SDK.ImportDevices
         /// <summary>
         /// The description
         /// </summary>
-        public string Description;
+        public string Description { get; set; }
 
         /// <summary>
-        /// The node id
+        /// The group names
         /// </summary>
-        public string NodeId;
+        public string GroupNames { get; set; }
+
+        /// <summary>
+        /// The asset type name
+        /// </summary>
+        public string AssetType { get; set; }
 
         /// <summary>
         /// Gets or sets the serial number.

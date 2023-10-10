@@ -1,18 +1,9 @@
 # importDevices.csv
-# Structure: <description>(required), <serialNumber>, <groupId1|groupId2|...>(requires exactly one asset type), <vin>
+# Structure: <description>, <serialNumber>, <groupName1|groupName2|...>, <assetType>(vehicle By Default), <vin>
 # -------------------------------------------------------------------------
 # lines beginning with '#' are comments and ignored
-# assumptions: 
-# b1, b2, b3, b4 are existing groupIds in database
-# b1, b2, b3 are custom groups that are not children of each other or any built-in groups
-# b4 is an custom asset type groups that is a child of GroupVehicleId
-Imported Vehicle 1,G###########,GroupVehicleId
-Imported Vehicle 2,G###########,GroupCompanyId|GroupVehicleId
-Imported Vehicle 3,G###########,GroupVehicleId|b1|b2|b3
-Imported Vehicle 4,G###########,GroupVehicleId|GroupBatteryElectricVehicleId
-Imported Vehicle 5,G###########,GroupVehicleId,VEHICLE_ID_NUMBER
-Imported Vehicle 6,I###########,GroupVehicleId,VEHICLE_ID_NUMBER
-Imported Vehicle 7,,GroupVehicleId,VEHICLE_ID_NUMBER
-Imported Vehicle 8,,GroupTrailerId
-Imported Vehicle 9,,b4
-Imported Vehicle 10,,b1|b4
+Imported Vehicle 1,SERIAL_NO_PLACEHOLDER,Company Group,Vehicle,VIN_PLACEHOLDER
+Imported Vehicle 2,SERIAL_NO_PLACEHOLDER,Custom Group 1,
+Imported Vehicle 3,SERIAL_NO_PLACEHOLDER,Battery Electric Vehicle,,VIN_PLACEHOLDER
+Imported Vehicle 4,,Custom Group 1|Custom Group 2|Custom Group 3,Trailer,VIN_PLACEHOLDER
+Imported Vehicle 5,,Company Group,Custom Asset Type,
