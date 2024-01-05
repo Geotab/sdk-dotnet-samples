@@ -115,7 +115,7 @@ namespace Geotab.SDK.ExtractMileage
                 }
                 else 
                 {
-                    Console.WriteLine("Unknown file type");
+                    Console.WriteLine(" Unknown file type");
                 }
 
                 Console.WriteLine();
