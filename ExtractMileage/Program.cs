@@ -109,9 +109,13 @@ namespace Geotab.SDK.ExtractMileage
                 {
                     WriteXml(odometerReadings, fileName, utcNow);
                 }
-                else
+                else if (fileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
                 {
                     WriteCsv(odometerReadings, fileName, utcNow);
+                }
+                else 
+                {
+                    Console.WriteLine(" Unknown file type");
                 }
 
                 Console.WriteLine();
