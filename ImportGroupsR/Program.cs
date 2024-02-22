@@ -6,6 +6,16 @@ using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
+/***************************************************************
+ * DISCLAIMER: This code example is provided for demonstration *
+ * purposes only. Depending on the frequency at which it is   *
+ * executed, it may be subject to rate limits imposed by APIs *
+ * or other services it interacts with. It is recommended to   *
+ * review and adjust the code as necessary to handle rate      *
+ * limits or any other constraints relevant to your use case.  *
+ ***************************************************************/
+
+
 namespace Geotab.SDK.ImportGroupsR
 {
     static class Program
