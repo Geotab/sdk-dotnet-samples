@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>DataFeed</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutDir>bin\$(Configuration)\$(TargetFramework)</OutDir>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
