@@ -5,6 +5,16 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
+/***************************************************************
+ * DISCLAIMER: This code example is provided for demonstration *
+ * purposes only. Depending on the frequency at which it is   *
+ * executed, it may be subject to rate limits imposed by APIs *
+ * or other services it interacts with. It is recommended to   *
+ * review and adjust the code as necessary to handle rate      *
+ * limits or any other constraints relevant to your use case.  *
+ ***************************************************************/
+
+
 namespace Geotab.SDK.DataFeed
 {
     /// <summary>
@@ -69,8 +79,12 @@ namespace Geotab.SDK.DataFeed
                                 Task.WaitAll(tasks);
 
                                 if (continuous && Console.ReadLine() != null)
-                                // This task should run async
-                                Task task = Task.Run(async () => await worker.DoWorkAsync(continuous), cancellationToken.Token);
+                                {
+                                    // This task should run async
+                                    Func<Task> function = async () => await worker.DoWorkAsync(continuous);
+                                    Task task = Task.Run(function, cancellationToken.Token);
+                                }
+
                                 if (continuous)
 
                                 {
