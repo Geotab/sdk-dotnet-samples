@@ -42,7 +42,7 @@ namespace Geotab.SDK.GetLogs
                     Console.WriteLine("Command line parameters:");
                     Console.WriteLine("dotnet run <server> <database> <username> <password> <serialNumber>");
                     Console.WriteLine();
-                    Console.WriteLine("Command line:        dotnet run server database username password inputfile");
+                    Console.WriteLine("Command line:        dotnet run server database username password serialNumber");
                     Console.WriteLine("server             - The server name (Example: my.geotab.com)");
                     Console.WriteLine("database           - The database name (Example: G560)");
                     Console.WriteLine("username           - The Geotab user name");
