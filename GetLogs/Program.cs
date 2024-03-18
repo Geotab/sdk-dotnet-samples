@@ -90,7 +90,7 @@ namespace Geotab.SDK.GetLogs
                 Device device = null;
                 try
                 {
-                    DeviceSearch deviceSearch = new DeviceSearch
+                    DeviceSearch deviceSearch = new()
                     {
                         SerialNumber = serialNumber
                     };
@@ -116,7 +116,7 @@ namespace Geotab.SDK.GetLogs
                 {
                     var toDate = DateTime.UtcNow;
                     var fromDate = toDate.AddDays(-7);
-                    LogRecordSearch logRecordSearch = new LogRecordSearch
+                    LogRecordSearch logRecordSearch = new()
                     {
                         DeviceSearch = new DeviceSearch(device.Id),
                         FromDate = fromDate,
@@ -125,7 +125,7 @@ namespace Geotab.SDK.GetLogs
                     IList<LogRecord> logs = await api.CallAsync<IList<LogRecord>>("Get", typeof(LogRecord), new { search = logRecordSearch });
 
                     // Use a string builder for the results and limit the amount of data entered into the text box.
-                    StringBuilder stringBuilder = new StringBuilder(10000);
+                    StringBuilder stringBuilder = new(10000);
                     if (logs.Count == 0)
                     {
                         stringBuilder.Append("No Logs Found");
