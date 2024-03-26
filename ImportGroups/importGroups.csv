@@ -6,29 +6,28 @@
 # 
 # create 2 groups under 'Company Group'
 # -------------------------------------------------------------------------
-Company Group,Asia
-Company Group,Africa
+Company Group,Europe
+Company Group,NorthAmerica
 # -------------------------------------------------------------------------
 # create 4 groups: 'Canada' and 'USA' with the parent group: 'NorthAmerica'
 # and 'Transnistria' and 'UK' with the parent group: 'Europe'
 # -------------------------------------------------------------------------
-Asia,China
-Africa,Eqypt
-Europe,France
-Europe,Germany
+NorthAmerica,Canada
+NorthAmerica,USA
+Europe,Transnistria
+Europe,UK
 # -------------------------------------------------------------------------
 # create 2 groups under Canada
 # -------------------------------------------------------------------------
-China,Shanghai
-Germany,Berlin
+Canada,Ontario
+Canada,BC
 # -------------------------------------------------------------------------
 # create 2 groups under USA
 # -------------------------------------------------------------------------
-USA,NV
-USA,NY
+USA,CA
+USA,MI
 # -------------------------------------------------------------------------
-# create 2 groups under built in groups
+# create 2 groups under Built-in Groups
 # -------------------------------------------------------------------------
-Vehicle,Bus
-Vehicle,Truck
-Trailer,SampleTrailer
+Vehicle,Cars
+Vehicle,Stagecoach

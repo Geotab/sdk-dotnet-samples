@@ -27,10 +27,10 @@ Parent Group Name | New Group Name
 # -------------------------------------------------------------------------
 # lines beginning with '#' are comments and ignored
 #
-# create 2 groups under 'Organization'
+# create 2 groups under 'Company Group'
 # -------------------------------------------------------------------------
-Organization,DriverGroup
-Organization,VehicleGroups
+Company Group,DriverGroup
+Company Group,VehicleGroups
 ```
 
 ## Getting started
