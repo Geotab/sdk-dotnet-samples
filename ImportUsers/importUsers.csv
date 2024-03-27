@@ -1,5 +1,5 @@
 # importUsers.csv
-# Structure: User (Email), Password, Data Access,Security Clearance,First Name,Last Name
+# Structure: User (Email), Password, Data Access, Security Clearance, First Name, Last Name
 # -------------------------------------------------------------------------
 # lines beginning with '#' are comments and ignored
 
