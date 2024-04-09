@@ -20,11 +20,11 @@ This console application demonstrates importing users from a .csv file.
 
 The .csv file format should follow this layout:
 
-email | password | data access | security clearance name | first name | last name
+email | password | groups | security clearance name | first name | last name
 
 ```csv
 # importUsers.csv
-# Structure: User (Email), Password, Data Access,Security Clearance,First Name,Last Name
+# Structure: User (Email), Password, Groups, Security Clearance, First Name, Last Name
 # -------------------------------------------------------------------------
 # lines beginning with '#' are comments and ignored
 

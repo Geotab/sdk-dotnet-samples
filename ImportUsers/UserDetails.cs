@@ -6,18 +6,18 @@ namespace Geotab.SDK.ImportUsers
     /// Object representing user details.
     /// </summary>
     /// <remarks>
-    /// Fields include user information such as email, password, data access, security clearance, first name, and last name.
+    /// Fields include user information such as email, password, groups, security clearance, first name, and last name.
     /// </remarks>
     /// <remarks>
     /// Initializes a new instance of the <see cref="UserDetails"/> class.
     /// </remarks>
     /// <param name="user">The user.</param>
     /// <param name="password">The password.</param>
-    /// <param name="dataAccess">The data access.</param>
+    /// <param name="groups">The groups.</param>
     /// <param name="securityClearance">The security clearance.</param>
     /// <param name="firstName">The first name.</param>
     /// <param name="lastName">The last name.</param>
-    class UserDetails(User user, string password, string dataAccess, string securityClearance, string firstName, string lastName)
+    class UserDetails(User user, string password, string groups, string securityClearance, string firstName, string lastName)
     {
         /// <summary>
         /// The user.
@@ -30,9 +30,9 @@ namespace Geotab.SDK.ImportUsers
         public readonly string PasswordNode = password;
 
         /// <summary>
-        /// The data access.
+        /// The groups.
         /// </summary>
-        public readonly string DataAccessNode = dataAccess;
+        public readonly string GroupsNode = groups;
 
         /// <summary>
         /// The security clearance.

@@ -16,7 +16,7 @@ namespace Geotab.SDK.ImportUsers
         /// <summary>
         /// Searches a list of organization groups for matches based on name.
         /// </summary>
-        /// <param name="names">The names to search for. This is from the CSV - Data Access.</param>
+        /// <param name="names">The name of the group to search for. This is from the CSV - group node.</param>
         /// <param name="organizationGroups">The group collection to search.</param>
         /// <returns>A list of organization groups.</returns>
         static IList<Group> GetOrganizationGroups(IEnumerable<string> names, IList<Group> organizationGroups)
@@ -34,6 +34,10 @@ namespace Geotab.SDK.ImportUsers
                 if (group != null)
                 {
                     groups.Add(group);
+                }
+                else
+                {
+                    Console.WriteLine($"** WARNING: The group '{groupName}' could not be located. The user will be added without association to this group. Please verify the group name or create it if necessary.");
                 }
             }
 
@@ -84,10 +88,10 @@ namespace Geotab.SDK.ImportUsers
         /// <returns>A collection of UserDetails objects.</returns>
         static IList<UserDetails> LoadUsersFromCSV(string filename)
         {
-            List<UserDetails> userDetails = new List<UserDetails>();
+            List<UserDetails> userDetails = [];
             int count = 0;
 
-            using (StreamReader streamReader = new StreamReader(filename))
+            using (StreamReader streamReader = new(filename))
             {
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
@@ -107,7 +111,7 @@ namespace Geotab.SDK.ImportUsers
 
                         string userName = columns[0].Trim();
                         string password = columns[1].Trim();
-                        string dataAccess = columns[2].Trim();
+                        string groups = columns[2].Trim();
                         string securityClearance = columns[3].Trim();
                         string firstName = columns[4].Trim();
                         string lastName = columns[5].Trim();
@@ -115,7 +119,7 @@ namespace Geotab.SDK.ImportUsers
                         DateTime maxValue = DateTime.MaxValue;
                         DateTime minValue = DateTime.MinValue;
                         var user = User.CreateBasicUser(null, null, userName, firstName, lastName, password, null, null, null, minValue, maxValue, null, null, null, null);
-                        userDetails.Add(new UserDetails(user, password, dataAccess, securityClearance, firstName, lastName));
+                        userDetails.Add(new UserDetails(user, password, groups, securityClearance, firstName, lastName));
                     }
                     catch (Exception exception)
                     {
@@ -145,14 +149,14 @@ namespace Geotab.SDK.ImportUsers
                 {
                     Console.WriteLine();
                     Console.WriteLine("Command line parameters:");
-                    Console.WriteLine("dotnet run <server> <database> <username> <password> <inputfile>");
+                    Console.WriteLine("dotnet run <server> <database> <username> <password> <inputFile>");
                     Console.WriteLine();
-                    Console.WriteLine("Command line:        dotnet run server database username password inputfile");
+                    Console.WriteLine("Command line:        dotnet run server database username password inputFile");
                     Console.WriteLine("server             - The server name (Example: my.geotab.com)");
                     Console.WriteLine("database           - The database name (Example: G560)");
                     Console.WriteLine("username           - The Geotab user name");
                     Console.WriteLine("password           - The Geotab password");
-                    Console.WriteLine("inputfile          - File name of the CSV file to import.");
+                    Console.WriteLine("inputFile          - File name of the CSV file to import.");
                     Console.WriteLine();
                     return;
                 }
@@ -183,16 +187,16 @@ namespace Geotab.SDK.ImportUsers
                 await api.AuthenticateAsync();
 
                 // Retrieve existing users and groups from the database
-                IList<User> existingUsers = await api.CallAsync<List<User>>("Get", typeof(User)) ?? new List<User>();
-                IList<Group> allGroups = await api.CallAsync<List<Group>>("Get", typeof(Group)) ?? new List<Group>();
-                IList<Group> securityGroups = await api.CallAsync<List<Group>>("Get", typeof(Group), new { search = new GroupSearch(new SecurityGroup().Id) }) ?? new List<Group>();
+                IList<User> existingUsers = await api.CallAsync<List<User>>("Get", typeof(User)) ?? [];
+                IList<Group> allGroups = await api.CallAsync<List<Group>>("Get", typeof(Group)) ?? [];
+                IList<Group> securityGroups = await api.CallAsync<List<Group>>("Get", typeof(Group), new { search = new GroupSearch(new SecurityGroup().Id) }) ?? [];
 
                 // Import users
                 Console.WriteLine("Importing users...");
                 foreach (UserDetails userDetail in userDetails)
                 {
                     User user = userDetail.UserNode;
-                    user.CompanyGroups = GetOrganizationGroups(userDetail.DataAccessNode.Split('|'), allGroups);
+                    user.CompanyGroups = GetOrganizationGroups(userDetail.GroupsNode.Split('|'), allGroups);
                     user.SecurityGroups = GetSecurityGroups(userDetail.SecurityClearanceNode, securityGroups);
 
                     if (ValidateUser(user, existingUsers))
