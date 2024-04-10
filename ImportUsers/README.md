@@ -1,31 +1,30 @@
 # Import Users
 
-This is a console example of importing users from a .csv file.
+This console application demonstrates importing users from a .csv file.
 
-Steps:
+## Steps:
 
-1. Process command line arguments: Server, Database, Username, Password, Input File and load .csv file.
-1. Create Geotab API object and Authenticate.
-1. Create users.
-1. Add organization and security nodes to the users.
-1. Create Geotab API object and Authenticate.
-1. Import users into database.
+1. Process command line arguments to specify Server, Database, Username, Password, and Input File, and load the .csv file.
+2. Create a Geotab API object and authenticate.
+3. Create users.
+4. Add organization and security nodes to the users.
+5. Import users into the database.
 
-> the .csv file included in this project is a sample, you may need to change entries (such as group names or password complexity) for the example to work.
+> **Note:** The provided .csv file is a sample. You may need to adjust entries (such as group names or password complexity) for the example to function correctly.
 
 ## Prerequisites
 
-The sample application requires:
+[.NET Core 2.0 SDK](https://dot.net/core) or higher
 
-- [.Net core 2.0 SDK](https://dot.net/core) or higher
+## CSV Layout
 
-## CSV layout
+The .csv file format should follow this layout:
 
-email | password | data access | secuity cleance name | first name | last name
+email | password | groups | security clearance name | first name | last name
 
 ```csv
 # importUsers.csv
-# Structure: User (Email), Password, Data Access,Security Clearance,First Name,Last Name
+# Structure: User (Email), Password, Groups, Security Clearance, First Name, Last Name
 # -------------------------------------------------------------------------
 # lines beginning with '#' are comments and ignored
 

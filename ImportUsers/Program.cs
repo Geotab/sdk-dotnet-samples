@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
@@ -25,29 +26,31 @@ namespace Geotab.SDK.ImportUsers
         /// <summary>
         /// Searches a list of organization groups for matches based on name.
         /// </summary>
-        /// <param name="names">The names to search for.</param>
+        /// <param name="names">The name of the group to search for. This is from the CSV - group node.</param>
         /// <param name="organizationGroups">The group collection to search.</param>
         /// <returns>A list of organization groups.</returns>
         static IList<Group> GetOrganizationGroups(IEnumerable<string> names, IList<Group> organizationGroups)
         {
-            IList<Group> groups = new List<Group>();
+            IList<Group> groups = [];
+
             foreach (string groupName in names)
             {
                 string name = groupName.Trim().ToLowerInvariant();
-                if (name.Equals("organization") || name.Equals("entire organization"))
+                if (name.Equals("organization") || name.Equals("entire organization") || name.Equals("company"))
                 {
-                    name = "**Org**";
+                    name = "Company Group";
                 }
-                for (int i = 0; i < organizationGroups.Count; i++)
+                Group group = organizationGroups.FirstOrDefault(aGroup => aGroup.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                if (group != null)
                 {
-                    Group group = organizationGroups[i];
-                    if (group.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        groups.Add(group);
-                        break;
-                    }
+                    groups.Add(group);
+                }
+                else
+                {
+                    Console.WriteLine($"** WARNING: The group '{groupName}' could not be located. The user will be added without association to this group. Please verify the group name or create it if necessary.");
                 }
             }
+
             return groups;
         }
 
@@ -55,34 +58,33 @@ namespace Geotab.SDK.ImportUsers
         /// Searches a list of security groups for matches based on name.
         /// </summary>
         /// <param name="name">The security group name.</param>
-        /// <param name="securityGroups">The groups collection to search.</param>
+        /// <param name="securityGroups">The groups collection to search. This is from the CSV Security Clearance</param>
         /// <returns>A list of security groups.</returns>
         static IList<Group> GetSecurityGroups(string name, IList<Group> securityGroups)
         {
-            IList<Group> groups = new List<Group>();
+            IList<Group> groups = [];
             name = name.Trim().ToLowerInvariant();
             if (name.Equals("administrator") || name.Equals("admin"))
             {
                 name = "**EverythingSecurity**";
             }
-            if (name.Equals("superviser") || name.Equals("supervisor"))
+            else if (name.Equals("superviser") || name.Equals("supervisor"))
             {
                 name = "**SupervisorSecurity**";
             }
-            if (name.Equals("view only") || name.Equals("viewonly"))
+            else if (name.Equals("view only") || name.Equals("viewonly"))
             {
                 name = "**ViewOnlySecurity**";
             }
-            if (name.Equals("nothing"))
+            else if (name.Equals("nothing"))
             {
                 name = "**NothingSecurity**";
             }
-            for (int i = 0; i < securityGroups.Count; i++)
+            foreach (Group aSecurityGroup in securityGroups)
             {
-                Group node = securityGroups[i];
-                if (node.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                if (aSecurityGroup.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                 {
-                    groups.Add(node);
+                    groups.Add(aSecurityGroup);
                     break;
                 }
             }
@@ -90,15 +92,16 @@ namespace Geotab.SDK.ImportUsers
         }
 
         /// <summary>
-        /// Loads rows from a csv file into a collection of UserDetails objects.
+        /// Loads rows from a CSV file into a collection of UserDetails objects.
         /// </summary>
-        /// <param name="filename">The filename.</param>
+        /// <param name="filename">The filename of the CSV file.</param>
         /// <returns>A collection of UserDetails objects.</returns>
         static IList<UserDetails> LoadUsersFromCSV(string filename)
         {
-            List<UserDetails> userDetails = new List<UserDetails>();
+            List<UserDetails> userDetails = [];
             int count = 0;
-            using (StreamReader streamReader = new StreamReader(filename))
+
+            using (StreamReader streamReader = new(filename))
             {
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
@@ -107,8 +110,8 @@ namespace Geotab.SDK.ImportUsers
                     {
                         count++;
 
-                        // Consider lines starting with # to be comments
-                        if (line.StartsWith("#", StringComparison.Ordinal) || line.Length == 0)
+                        // Consider lines starting with # to be comments or empty lines
+                        if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line))
                         {
                             continue;
                         }
@@ -118,15 +121,15 @@ namespace Geotab.SDK.ImportUsers
 
                         string userName = columns[0].Trim();
                         string password = columns[1].Trim();
-                        string organizationNodes = columns[2].Trim();
-                        string securityNodes = columns[3].Trim();
+                        string groups = columns[2].Trim();
+                        string securityClearance = columns[3].Trim();
                         string firstName = columns[4].Trim();
                         string lastName = columns[5].Trim();
 
-                        DateTime maxValue = System.TimeZoneInfo.ConvertTimeToUtc(DateTime.MaxValue);
+                        DateTime maxValue = DateTime.MaxValue;
                         DateTime minValue = DateTime.MinValue;
                         var user = User.CreateBasicUser(null, null, userName, firstName, lastName, password, null, null, null, minValue, maxValue, null, null, null, null);
-                        userDetails.Add(new UserDetails(user, organizationNodes, securityNodes));
+                        userDetails.Add(new UserDetails(user, password, groups, securityClearance, firstName, lastName));
                     }
                     catch (Exception exception)
                     {
@@ -156,14 +159,14 @@ namespace Geotab.SDK.ImportUsers
                 {
                     Console.WriteLine();
                     Console.WriteLine("Command line parameters:");
-                    Console.WriteLine("dotnet run <server> <database> <username> <password> <inputfile>");
+                    Console.WriteLine("dotnet run <server> <database> <username> <password> <inputFile>");
                     Console.WriteLine();
-                    Console.WriteLine("Command line:        dotnet run server database username password inputfile");
+                    Console.WriteLine("Command line:        dotnet run server database username password inputFile");
                     Console.WriteLine("server             - The server name (Example: my.geotab.com)");
                     Console.WriteLine("database           - The database name (Example: G560)");
                     Console.WriteLine("username           - The Geotab user name");
                     Console.WriteLine("password           - The Geotab password");
-                    Console.WriteLine("inputfile          - File name of the CSV file to import.");
+                    Console.WriteLine("inputFile          - File name of the CSV file to import.");
                     Console.WriteLine();
                     return;
                 }
@@ -188,25 +191,23 @@ namespace Geotab.SDK.ImportUsers
                     return;
                 }
 
-                // Create Geotab API object
-                API api = new API(username, password, null, database, server);
-
-                // Authenticate
+                // Create Geotab API object and authenticate
                 Console.WriteLine("Authenticating...");
+                API api = new(username, password, null, database, server);
                 await api.AuthenticateAsync();
 
-                // Start import
-                Console.WriteLine("Importing users...");
+                // Retrieve existing users and groups from the database
+                IList<User> existingUsers = await api.CallAsync<List<User>>("Get", typeof(User)) ?? [];
+                IList<Group> allGroups = await api.CallAsync<List<Group>>("Get", typeof(Group)) ?? [];
+                IList<Group> securityGroups = await api.CallAsync<List<Group>>("Get", typeof(Group), new { search = new GroupSearch(new SecurityGroup().Id) }) ?? [];
 
-                IList<User> existingUsers = await api.CallAsync<List<User>>("Get", typeof(User)) ?? new List<User>();
-                IList<Group> allGroups = await api.CallAsync<IList<Group>>("Get", typeof(Group)) ?? new List<Group>();
-                IList<Group> securityGroups = await api.CallAsync<IList<Group>>("Get", typeof(Group), new { search = new GroupSearch(new SecurityGroup().Id) }) ?? new List<Group>();
+                // Import users
+                Console.WriteLine("Importing users...");
                 foreach (UserDetails userDetail in userDetails)
                 {
-                    // Add groups to user
-                    User user = userDetail.User;
-                    user.CompanyGroups = GetOrganizationGroups(userDetail.OrganizationNodeNames.Split('|'), allGroups);
-                    user.SecurityGroups = GetSecurityGroups(userDetail.SecurityNodeName, securityGroups);
+                    User user = userDetail.UserNode;
+                    user.CompanyGroups = GetOrganizationGroups(userDetail.GroupsNode.Split('|'), allGroups);
+                    user.SecurityGroups = GetSecurityGroups(userDetail.SecurityClearanceNode, securityGroups);
 
                     if (ValidateUser(user, existingUsers))
                     {
@@ -242,12 +243,11 @@ namespace Geotab.SDK.ImportUsers
         /// </summary>
         /// <param name="name">The user name to search for.</param>
         /// <param name="existingUsers">The collection of existing users.</param>
-        /// <returns>True if duplicate found, otherwise false.</returns>
+        /// <returns>True if a duplicate is found, otherwise false.</returns>
         static bool UserExists(string name, IList<User> existingUsers)
         {
-            for (int i = 0; i < existingUsers.Count; i++)
+            foreach (User user in existingUsers)
             {
-                User user = existingUsers[i];
                 if (user.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
@@ -257,11 +257,11 @@ namespace Geotab.SDK.ImportUsers
         }
 
         /// <summary>
-        /// Validate a user has groups assigned and does not exist.
+        /// Validate that a user has groups assigned and does not exist.
         /// </summary>
         /// <param name="user">The user to validate.</param>
-        /// <param name="existingUsers">IList of existing users.</param>
-        /// <returns>True if user is valid otherwise False.</returns>
+        /// <param name="existingUsers">The list of existing users.</param>
+        /// <returns>True if the user is valid, otherwise False.</returns>
         static bool ValidateUser(User user, IList<User> existingUsers)
         {
             if (user.CompanyGroups == null || user.CompanyGroups.Count == 0)
