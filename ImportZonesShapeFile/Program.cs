@@ -29,10 +29,9 @@ namespace Geotab.SDK.ImportZonesShapeFile
     static class Program
     {
         // The default colors of Geotab zone types
-        static readonly Color customerZoneColor = new Color(255, 0, 0, 192);
-
-        static readonly Color homeZoneColor = new Color(0, 128, 0, 192);
-        static readonly Color officeZoneColor = new Color(255, 165, 0, 192);
+        static readonly Color customerZoneColor = new(255, 0, 0, 192);
+        static readonly Color homeZoneColor = new(0, 128, 0, 192);
+        static readonly Color officeZoneColor = new(255, 165, 0, 192);
 
         /// <summary>
         /// Gets the distance squared between 2 points.
@@ -52,12 +51,12 @@ namespace Geotab.SDK.ImportZonesShapeFile
         static int GetNameAttributeIndex(ShapeFileLayer layer, ref string nameAttribute)
         {
             string[] attributes = layer.FieldNames;
-            List<string> list = new List<string>();
+            List<string> list = [];
             foreach (string s in attributes)
             {
                 list.Add(s.ToLowerInvariant());
             }
-            attributes = list.ToArray();
+            attributes = [.. list];
 
             if (!string.IsNullOrEmpty(nameAttribute))
             {
@@ -105,17 +104,6 @@ namespace Geotab.SDK.ImportZonesShapeFile
         /// 2) Process the shapes present in the shape file, using the Geotab.Geographical components to create zones from the shape points and names.
         /// 3) Create Geotab API object and Authenticate.
         /// 4) Import created zones into the database.
-        /// The format of csv file is next:
-        /// [Zone_name]
-        /// [polygon_point_x], [polygon_point_y]
-        /// [polygon_point_x], [polygon_point_y]
-        /// .
-        /// .
-        /// [polygon_point_x], [polygon_point_y]
-        /// [Zone_name]
-        /// [polygon_point_x], [polygon_point_y]
-        /// .
-        /// .
         /// A complete Geotab API object and method reference is available at the Geotab Developer page.
         /// </summary>
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project > Properties > Debug Tab > Start Options: Command line arguments.</param>
@@ -127,9 +115,9 @@ namespace Geotab.SDK.ImportZonesShapeFile
                 {
                     Console.WriteLine();
                     Console.WriteLine("Command line parameters:");
-                    Console.WriteLine("dotnet run <server> <database> <login> <password> [--nameAttr=<attr>] [--namePrefix=<prefix>] [--type=<name>] <inputfile>");
+                    Console.WriteLine("dotnet run <server> <database> <username> <password> [--nameAttr=<attr>] [--namePrefix=<prefix>] [--type=<name>] [--threshold=<number>] <inputFile>");
                     Console.WriteLine();
-                    Console.WriteLine("Command line:             dotnet run server database username password --nameAttr=name --namePrefix=CA --type=home inputfile.shp");
+                    Console.WriteLine("Command line:             dotnet run server database username password --nameAttr=name --namePrefix=CA --type=home inputFile.shp");
                     Console.WriteLine("server                   - The server name (Example: my.geotab.com)");
                     Console.WriteLine("database                 - The database name (Example: G560)");
                     Console.WriteLine("username                 - The Geotab user name");
@@ -143,8 +131,8 @@ namespace Geotab.SDK.ImportZonesShapeFile
                     Console.WriteLine("                           points. Any point within approximately <threshold>");
                     Console.WriteLine("                           meters of a line connecting its neighbors will be");
                     Console.WriteLine("                           removed.");
-                    Console.WriteLine("inputfile                - File name of the Shape file containing the shapes to");
-                    Console.WriteLine("                           import with extension. (.shp, .shx, .dbf)");
+                    Console.WriteLine("inputFile                - File name of the Shape file containing the shapes to");
+                    Console.WriteLine("                           import with extension. (.shp, .csv)");
                     Console.WriteLine();
                     return;
                 }
@@ -155,15 +143,15 @@ namespace Geotab.SDK.ImportZonesShapeFile
                 string database = args[1];
                 string username = args[2];
                 string password = args[3];
-                List<ZoneType> zoneTypes = new List<ZoneType>();
                 string fileName = args[last];
                 string nameAttribute = null;
-                string prefix = "";
+                string namePrefix = "";
                 double distanceSquaredError = -1;
                 Color zonesColour = customerZoneColor;
+                List<ZoneType> zoneTypes = [];
 
                 // Create Geotab API object
-                API api = new API(username, password, null, database, server);
+                API api = new(username, password, null, database, server);
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
@@ -186,17 +174,17 @@ namespace Geotab.SDK.ImportZonesShapeFile
                 // Options from args
                 for (int i = 4; i < last; i++)
                 {
-                    string option = args[i].ToLowerInvariant();
+                    string option = args[i];
                     int index = option.IndexOf('=');
 
                     // Check the option is in the established format
                     if (index >= 0 && option.Length > index + 1)
                     {
                         // Grab the value of the optional argument
-                        string value = option.Substring(index + 1).ToLowerInvariant();
+                        string value = option[(index + 1)..].ToLowerInvariant();
 
                         // Zone type option
-                        if (option.Contains("type"))
+                        if (option.StartsWith("--type="))
                         {
                             ZoneType zoneType = GetZoneType(value, availableZoneTypes);
 
@@ -223,19 +211,19 @@ namespace Geotab.SDK.ImportZonesShapeFile
                         }
 
                         // Name attribute option
-                        else if (option.Contains("nameattr"))
+                        else if (option.StartsWith("--nameAttr="))
                         {
                             nameAttribute = value;
                         }
 
                         // Name prefix option
-                        else if (option.Contains("prefix"))
+                        else if (option.StartsWith("--namePrefix="))
                         {
-                            prefix = value.ToUpperInvariant();
+                            namePrefix = value.ToUpperInvariant();
                         }
 
                         // Zone shape simplification threshold option
-                        else if (option.Contains("threshold"))
+                        else if (option.StartsWith("--threshold="))
                         {
                             if (!double.TryParse(value, out double threshold))
                             {
@@ -264,8 +252,8 @@ namespace Geotab.SDK.ImportZonesShapeFile
                     zoneTypes.Add(ZoneTypeCustomer.Value);
                 }
 
-                IList<ISimpleCoordinate> coordinates = new List<ISimpleCoordinate>();
-                IList<Zone> zones = new List<Zone>();
+                IList<ISimpleCoordinate> coordinates = [];
+                IList<Zone> zones = [];
 
                 // Initialize variables to hold the shape file
                 DateTime maxValue = System.TimeZoneInfo.ConvertTimeToUtc(DateTime.MaxValue);
@@ -278,60 +266,58 @@ namespace Geotab.SDK.ImportZonesShapeFile
                         return;
                     }
                     Console.WriteLine("Loading csv file...");
-                    using (StreamReader reader = File.OpenText(fileName))
+                    using StreamReader reader = File.OpenText(fileName);
+                    string line;
+                    string zoneName = string.Empty;
+                    while (!string.IsNullOrEmpty(line = reader.ReadLine()))
                     {
-                        string line;
-                        string zoneName = string.Empty;
-                        while (!string.IsNullOrEmpty(line = reader.ReadLine()))
+                        string[] values = line.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (values.Length == 0 || values.Length == 1 && string.IsNullOrWhiteSpace(values[0]))
                         {
-                            string[] values = line.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                            if (values.Length == 0 || values.Length == 1 && string.IsNullOrWhiteSpace(values[0]))
-                            {
-                                continue;
-                            }
-                            switch (values.Length)
-                            {
-                                case 1:
-                                    if (!string.IsNullOrEmpty(values[0]))
-                                    {
-                                        if (!string.IsNullOrEmpty(zoneName))
-                                        {
-                                            // Simplify the zone shape. This is an important step. Polygon complexity can drastically impact performance when loading/rendering zones.
-                                            coordinates = SimplifyPolygon(coordinates, distanceSquaredError);
-
-                                            // Create the zone object to be inserted later on
-                                            zones.Add(new Zone(null, null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
-                                        }
-                                        coordinates = new List<ISimpleCoordinate>();
-                                        zoneName = values[0];
-                                    }
-                                    break;
-
-                                case 2:
-
-                                    // read coordinates line by line
-                                    if (double.TryParse(values[0], out var xCoord) && double.TryParse(values[1], out var yCoord))
-                                    {
-                                        coordinates.Add(new Coordinate(xCoord, yCoord));
-                                    }
-                                    break;
-
-                                default:
-                                    Console.WriteLine($"Skipping a line with text '{line}'");
-                                    break;
-                            }
+                            continue;
                         }
-                        if (!string.IsNullOrEmpty(zoneName))
+                        switch (values.Length)
                         {
-                            coordinates = SimplifyPolygon(coordinates, distanceSquaredError);
-                            zones.Add(new Zone(null, null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
+                            case 1:
+                                if (!string.IsNullOrEmpty(values[0]))
+                                {
+                                    if (!string.IsNullOrEmpty(zoneName))
+                                    {
+                                        // Simplify the zone shape. This is an important step. Polygon complexity can drastically impact performance when loading/rendering zones.
+                                        coordinates = SimplifyPolygon(coordinates, distanceSquaredError);
+
+                                        // Create the zone object to be inserted later on
+                                        zones.Add(new Zone(null, null, (string.IsNullOrEmpty(namePrefix) ? "" : namePrefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
+                                    }
+                                    coordinates = [];
+                                    zoneName = values[0];
+                                }
+                                break;
+
+                            case 2:
+
+                                // read coordinates line by line
+                                if (double.TryParse(values[0], out var xCoord) && double.TryParse(values[1], out var yCoord))
+                                {
+                                    coordinates.Add(new Coordinate(xCoord, yCoord));
+                                }
+                                break;
+
+                            default:
+                                Console.WriteLine($"Skipping a line with text '{line}'");
+                                break;
                         }
+                    }
+                    if (!string.IsNullOrEmpty(zoneName))
+                    {
+                        coordinates = SimplifyPolygon(coordinates, distanceSquaredError);
+                        zones.Add(new Zone(null, null, (string.IsNullOrEmpty(namePrefix) ? "" : namePrefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
                     }
                 }
                 else
                 {
-                    FileInfo shapeFile = new FileInfo(fileName);
-                    FileMapLayerFactory factory = new FileMapLayerFactory(shapeFile);
+                    FileInfo shapeFile = new(fileName);
+                    FileMapLayerFactory factory = new(shapeFile);
                     ShapeFileLayer layer;
 
                     // Try to load the shape file
@@ -373,7 +359,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
                         }
 
                         // Get the points that define the polygon
-                        coordinates = new List<ISimpleCoordinate>();
+                        coordinates = [];
                         for (int i = 0; i < polygon.Count; i++)
                         {
                             EarthPoint earthPoint = (EarthPoint)polygon[i];
@@ -384,7 +370,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
                         // Simplify the polygon. This is an important step. Polygon complexity can drastically impact performance when loading/rendering zones.
                         coordinates = SimplifyPolygon(coordinates, distanceSquaredError);
 
-                        zones.Add(new Zone(null, null, (string.IsNullOrEmpty(prefix) ? "" : prefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
+                        zones.Add(new Zone(null, null, (string.IsNullOrEmpty(namePrefix) ? "" : namePrefix + " ") + zoneName, "", true, zoneTypes, coordinates, minValue, maxValue, zonesColour, true, groups));
                         featureIndex++;
                     }
                 }
@@ -439,7 +425,7 @@ namespace Geotab.SDK.ImportZonesShapeFile
                 return polygon;
             }
 
-            IList<ISimpleCoordinate> result = new List<ISimpleCoordinate>();
+            IList<ISimpleCoordinate> result = [];
 
             // No simplification necessary, so return what was passed in
             if (polygon.Count < 3)
