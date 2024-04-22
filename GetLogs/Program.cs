@@ -5,6 +5,16 @@ using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 
+/***************************************************************
+ * DISCLAIMER: This code example is provided for demonstration *
+ * purposes only. Depending on the frequency at which it is   *
+ * executed, it may be subject to rate limits imposed by APIs *
+ * or other services it interacts with. It is recommended to   *
+ * review and adjust the code as necessary to handle rate      *
+ * limits or any other constraints relevant to your use case.  *
+ ***************************************************************/
+
+
 namespace Geotab.SDK.GetLogs
 {
     /// <summary>
@@ -32,7 +42,7 @@ namespace Geotab.SDK.GetLogs
                     Console.WriteLine("Command line parameters:");
                     Console.WriteLine("dotnet run <server> <database> <username> <password> <serialNumber>");
                     Console.WriteLine();
-                    Console.WriteLine("Command line:        dotnet run server database username password inputfile");
+                    Console.WriteLine("Command line:        dotnet run server database username password serialNumber");
                     Console.WriteLine("server             - The server name (Example: my.geotab.com)");
                     Console.WriteLine("database           - The database name (Example: G560)");
                     Console.WriteLine("username           - The Geotab user name");
@@ -80,7 +90,7 @@ namespace Geotab.SDK.GetLogs
                 Device device = null;
                 try
                 {
-                    DeviceSearch deviceSearch = new DeviceSearch
+                    DeviceSearch deviceSearch = new()
                     {
                         SerialNumber = serialNumber
                     };
@@ -106,7 +116,7 @@ namespace Geotab.SDK.GetLogs
                 {
                     var toDate = DateTime.UtcNow;
                     var fromDate = toDate.AddDays(-7);
-                    LogRecordSearch logRecordSearch = new LogRecordSearch
+                    LogRecordSearch logRecordSearch = new()
                     {
                         DeviceSearch = new DeviceSearch(device.Id),
                         FromDate = fromDate,
@@ -115,7 +125,7 @@ namespace Geotab.SDK.GetLogs
                     IList<LogRecord> logs = await api.CallAsync<IList<LogRecord>>("Get", typeof(LogRecord), new { search = logRecordSearch });
 
                     // Use a string builder for the results and limit the amount of data entered into the text box.
-                    StringBuilder stringBuilder = new StringBuilder(10000);
+                    StringBuilder stringBuilder = new(10000);
                     if (logs.Count == 0)
                     {
                         stringBuilder.Append("No Logs Found");

@@ -6,21 +6,29 @@ using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Geotab.Checkmate.ObjectModel.AssetGroups;
 
+/***************************************************************
+ * DISCLAIMER: This code example is provided for demonstration *
+ * purposes only. Depending on the frequency at which it is   *
+ * executed, it may be subject to rate limits imposed by APIs *
+ * or other services it interacts with. It is recommended to   *
+ * review and adjust the code as necessary to handle rate      *
+ * limits or any other constraints relevant to your use case.  *
+ ***************************************************************/
 
 
 namespace Geotab.SDK.ImportGroups
 {
-    
+
     /// <summary>
     /// Main program
     /// </summary>
     static class Program
     {
         /// creates path and name of log file
-        private static String fileNameLogs = $"logs_{timestamp}.csv";
-        private static String filePathLogs = Path.Combine(Directory.GetCurrentDirectory(), fileNameLogs);
-        private static StreamWriter writer = new StreamWriter(filePathLogs, true) { AutoFlush = true };        
-        private static String timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+        private static readonly string fileNameLogs = $"logs_{timestamp}.csv";
+        private static readonly string filePathLogs = Path.Combine(Directory.GetCurrentDirectory(), fileNameLogs);
+        private static readonly StreamWriter writer = new(filePathLogs, true) { AutoFlush = true };
+        private static readonly string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
         /// <summary>
         /// Loads data from .csv file and creates a collection of <see cref="GroupRow"/> objects.
         /// </summary>
@@ -28,11 +36,11 @@ namespace Geotab.SDK.ImportGroups
         /// <returns>A collection of <see cref="GroupRow"/> objects.</returns>
         static async Task<List<GroupRow>> LoadGroupRowsFromCSV(string fileName)
         {
-            List<GroupRow> groups = new List<GroupRow>();
+            List<GroupRow> groups = [];
             int count = 0;
 
             // Read file
-            using (StreamReader streamReader = new StreamReader(fileName))
+            using (StreamReader streamReader = new(fileName))
             {
                 // Create a GroupRow for each line of the file
                 string line;
@@ -48,7 +56,7 @@ namespace Geotab.SDK.ImportGroups
                     try
                     {
                         // Create GroupRow from line columns
-                        GroupRow groupRow = new GroupRow();
+                        GroupRow groupRow = new();
                         string[] columns = line.Split(',');
                         groupRow.ParentGroupName = columns[0];
                         groupRow.GroupName = columns[1];
@@ -63,8 +71,8 @@ namespace Geotab.SDK.ImportGroups
             }
             return groups;
         }
-        
-        
+
+
         /// <summary>
         /// This is a Geotab API console example of importing groups from a CSV file.
         /// 1) Process command line arguments: Server, Database, Username, Password, Input File and load CSV file.
@@ -117,7 +125,7 @@ namespace Geotab.SDK.ImportGroups
                 }
 
                 // Create Geotab API object
-                API api = new API(username, password, null, database, server);
+                API api = new(username, password, null, database, server);
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
@@ -142,8 +150,8 @@ namespace Geotab.SDK.ImportGroups
                     Group parentGroup;
                     string parentGroupName = row.ParentGroupName;
 
-                    // If there is no parent node name or if the parent node's name matches organization or entire organization create a new CompanyGroup object.
-                    if (string.IsNullOrEmpty(parentGroupName) || parentGroupName.ToLowerInvariant() == "organization" || parentGroupName.ToLowerInvariant() == "entire organization")
+                    // If there is no parent node name or if the parent node's name matches company or entire company create a new CompanyGroup object.
+                    if (string.IsNullOrEmpty(parentGroupName) || parentGroupName.Equals("Company", StringComparison.InvariantCultureIgnoreCase) || parentGroupName.Equals("Company Group", StringComparison.InvariantCultureIgnoreCase))
                     {
                         parentGroup = new CompanyGroup();
                     }
@@ -155,7 +163,7 @@ namespace Geotab.SDK.ImportGroups
                             existingGroupDictionary = await PopulateGroupDictionaryAsync(api);
                         }
 
-                        // Check for non-organization Group in the dictionary of nodes that exist in the system.
+                        // Check for non-company Group in the dictionary of nodes that exist in the system.
                         if (!existingGroupDictionary.TryGetValue(parentGroupName.ToLowerInvariant(), out parentGroup))
                         {
                             Console.WriteLine($"Non-existent parent Group: {parentGroupName}");
@@ -183,25 +191,27 @@ namespace Geotab.SDK.ImportGroups
                     }
 
                     try
-                    {     
-                        // // determines if the parentGroup is a build in group
-                        if((parentGroup.Id.ToString().Contains("Id")) && (parentGroup.Id.ToString() != "GroupCompanyId")) 
+                    {
+                        // determines if the parentGroup is a build in group
+                        if (parentGroup.Id.ToString().Contains("Id") && (parentGroup.Id.ToString() != "GroupCompanyId"))
                         {
-                            var groupToAdd = new GroupWithGlobalReporting(null,name:row.GroupName, parent:Group.Get(parentGroup.Id));
-                            groupToAdd.IsGlobalReportingGroup = true;
+                            var groupToAdd = new GroupWithGlobalReporting(null, name: row.GroupName, parent: Group.Get(parentGroup.Id))
+                            {
+                                IsGlobalReportingGroup = true
+                            };
                             await api.CallAsync<Id>("Add", typeof(Group), new { entity = groupToAdd });
                             Console.WriteLine($"Successfully added: {row.GroupName}");
                             AddingLog($"Successfully added: {row.GroupName}");
                         }
-                        else 
+                        else
                         {
-                            var groupToAdd = new Group(null,name:row.GroupName, parent:parentGroup);
+                            var groupToAdd = new Group(null, name: row.GroupName, parent: parentGroup);
                             await api.CallAsync<Id>("Add", typeof(Group), new { entity = groupToAdd });
                             Console.WriteLine($"Successfully added: {row.GroupName}");
                             AddingLog($"Successfully added: {row.GroupName}");
                         }
 
-                            
+
                     }
                     catch (Exception exception)
                     {
@@ -246,7 +256,7 @@ namespace Geotab.SDK.ImportGroups
             for (var i = 0; i < dataStoreGroups.Count; i++)
             {
                 var group = dataStoreGroups[i];
-                
+
                 if (nonUniqueGroups.Contains(group.Name))
                 {
                     continue;

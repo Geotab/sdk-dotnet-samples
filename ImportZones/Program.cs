@@ -6,6 +6,16 @@ using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
 using Color = Geotab.Drawing.Color;
 
+/***************************************************************
+ * DISCLAIMER: This code example is provided for demonstration *
+ * purposes only. Depending on the frequency at which it is   *
+ * executed, it may be subject to rate limits imposed by APIs *
+ * or other services it interacts with. It is recommended to   *
+ * review and adjust the code as necessary to handle rate      *
+ * limits or any other constraints relevant to your use case.  *
+ ***************************************************************/
+
+
 namespace Geotab.SDK.ImportZones
 {
     /// <summary>
@@ -14,10 +24,10 @@ namespace Geotab.SDK.ImportZones
     static class Program
     {
         // The default colors of Geotab zone types
-        static readonly Color customerZoneColor = new Color(255, 0, 0, 192);
+        static readonly Color customerZoneColor = new(255, 0, 0, 192);
 
-        static readonly Color homeZoneColor = new Color(0, 128, 0, 192);
-        static readonly Color officeZoneColor = new Color(255, 165, 0, 192);
+        static readonly Color homeZoneColor = new(0, 128, 0, 192);
+        static readonly Color officeZoneColor = new(255, 165, 0, 192);
 
         /// <summary>
         /// Checks if a zone exists in a collection of zones based on it's name and group name.
@@ -78,7 +88,7 @@ namespace Geotab.SDK.ImportZones
         /// <returns>A list of <see cref="ISimpleCoordinate"/>.</returns>
         static IList<ISimpleCoordinate> GetCircleCoordinates(ISimpleCoordinate centroid, double radius, int numberOfPoints)
         {
-            IList<ISimpleCoordinate> circleCoordinates = new List<ISimpleCoordinate>();
+            IList<ISimpleCoordinate> circleCoordinates = [];
 
             // Draw a circular zone.
             double pointAngle = Math.PI / numberOfPoints * 2;
@@ -126,15 +136,15 @@ namespace Geotab.SDK.ImportZones
         /// <returns>A collection of ZoneRow</returns>
         static List<ZoneRow> LoadZonesFromCSV(string fileName)
         {
-            List<ZoneRow> customers = new List<ZoneRow>();
+            List<ZoneRow> customers = [];
             int count = 0;
-            using (StreamReader streamReader = new StreamReader(fileName))
+            using (StreamReader streamReader = new(fileName))
             {
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
                 {
                     // Consider lines starting with # to be comments
-                    if (line.StartsWith("#", StringComparison.Ordinal))
+                    if (line.StartsWith('#'))
                     {
                         count++;
                         continue;
@@ -143,7 +153,7 @@ namespace Geotab.SDK.ImportZones
                     try
                     {
                         // Create ZoneRow from line columns
-                        ZoneRow zoneRow = new ZoneRow();
+                        ZoneRow zoneRow = new();
                         string[] columns = line.Split(',');
                         zoneRow.Name = columns[0];
                         zoneRow.Longitude = float.Parse(columns[1]);
@@ -204,7 +214,7 @@ namespace Geotab.SDK.ImportZones
                 string filename = args[last];
                 int polygonSides = 4;
 
-                IList<ZoneType> zoneTypes = new List<ZoneType>();
+                IList<ZoneType> zoneTypes = [];
 
                 // Options from args
                 for (int i = 4; i < last; i++)
@@ -272,14 +282,14 @@ namespace Geotab.SDK.ImportZones
                 }
 
                 // Create Geotab API object
-                API api = new API(username, password, null, database, server);
+                API api = new(username, password, null, database, server);
 
                 // Authenticate
                 Console.WriteLine("Authenticating...");
                 await api.AuthenticateAsync();
 
                 // Get user
-                User user = await api.CallAsync<User>("RefreshUser");
+                User user = await api.CallAsync<User>("Get", typeof(User), new { search = new { name = username } });
 
                 // Start import
                 Console.WriteLine("Importing...");
@@ -354,7 +364,7 @@ namespace Geotab.SDK.ImportZones
                     try
                     {
                         // Create a new zone object
-                        Zone zone = CreateCircleZone(zoneRow.Name, "", zoneRow.Latitude, zoneRow.Longitude, zoneRow.Size, polygonSides, zoneTypes, zoneColor, new List<Group> { group });
+                        Zone zone = CreateCircleZone(zoneRow.Name, "", zoneRow.Latitude, zoneRow.Longitude, zoneRow.Size, polygonSides, zoneTypes, zoneColor, [group]);
                         await api.CallAsync<Id>("Add", typeof(Zone), new { entity = zone });
                         Console.WriteLine($"Zone: '{zoneRow.Name}' added");
                     }

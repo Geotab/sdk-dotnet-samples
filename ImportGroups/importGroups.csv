@@ -4,10 +4,10 @@
 # -------------------------------------------------------------------------
 # lines beginning with '#' are comments and ignored
 # 
-# create 2 groups under 'Organization'
+# create 2 groups under 'Company Group'
 # -------------------------------------------------------------------------
-Organization,Europe
-Organization,NorthAmerica
+Company Group,Europe
+Company Group,NorthAmerica
 # -------------------------------------------------------------------------
 # create 4 groups: 'Canada' and 'USA' with the parent group: 'NorthAmerica'
 # and 'Transnistria' and 'UK' with the parent group: 'Europe'
@@ -27,7 +27,7 @@ Canada,BC
 USA,CA
 USA,MI
 # -------------------------------------------------------------------------
-# create 2 groups under built in groups
+# create 2 groups under Built-in Groups
 # -------------------------------------------------------------------------
 Vehicle,Cars
 Vehicle,Stagecoach
