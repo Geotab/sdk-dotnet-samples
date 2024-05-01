@@ -132,7 +132,7 @@ namespace Geotab.SDK.ImportGroupsR
 
         public List<Group> GroupsParsedList { get; private set; }
 
-        // must be Company Group or decendent, a group with its sReference must be present in the database
+        // must be Company Group or descendant, a group with its sReference must be present in the database
         public static void RowParsedHandler(object sender, RowParsedEventArgs<Group> e, LoggerAction log, bool isVerboseMode, bool flush)
         {
             if (isVerboseMode || e.Exception != null)
@@ -208,7 +208,7 @@ namespace Geotab.SDK.ImportGroupsR
         }
 
         /// <summary>
-        /// Parses a comma separted string into a <see cref="Group"/> object and adds it to<paramref name="items"/>
+        /// Parses a comma separated string into a <see cref="Group"/> object and adds it to<paramref name="items"/>
         /// </summary>
         /// <param name="line">file line</param>
         /// <param name="items">list to accumulate</param>

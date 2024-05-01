@@ -29,7 +29,7 @@ namespace Geotab.SDK.ImportGroupsR
         /// </returns>
         public IEnumerator<Group> GetEnumerator()
         {
-            Queue<Group> queue = new Queue<Group>();
+            Queue<Group> queue = new();
             queue.Enqueue(root);
             while (queue.Count > 0)
             {
