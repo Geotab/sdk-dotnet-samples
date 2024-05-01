@@ -15,7 +15,6 @@ using Geotab.Checkmate.ObjectModel;
  * limits or any other constraints relevant to your use case.  *
  ***************************************************************/
 
-
 namespace Geotab.SDK.ImportGroupsR
 {
     static class Program

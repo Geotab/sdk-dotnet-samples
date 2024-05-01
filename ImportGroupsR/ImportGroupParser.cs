@@ -155,13 +155,13 @@ namespace Geotab.SDK.ImportGroupsR
         public async Task<List<Group>> ParseAsync(Stream stream)
         {
             // All groups under the Company Group with name *Org* are returned, with the Company Group itself being the first in list
-            groupListFromDb = await checkmateApi.CallAsync<IList<Group>>("Get", typeof(Group)) ?? new List<Group>();
+            groupListFromDb = await checkmateApi.CallAsync<IList<Group>>("Get", typeof(Group)) ?? [];
 
             GroupLookupFromDB = CreateDictionary(groupListFromDb, g => g.Reference, out groupsInDbWithNonUniqueReferenceLookup);
             groupLookupByIdFromDb = CreateDictionary(groupListFromDb, g => g.Id, out IDictionary<Id, IList<Group>> groupsWithNonUniqueIdLookup);
 
-            GroupLookupParsed = new Dictionary<string, Group>(); // is populated in the next line call, not obvious!!!
-            List<Group> items = new List<Group>();
+            GroupLookupParsed = []; // is populated in the next line call, not obvious!!!
+            List<Group> items = [];
             row = 0;
             using (StreamReader streamReader = new StreamReader(stream))
             {
@@ -256,7 +256,7 @@ namespace Geotab.SDK.ImportGroupsR
                     throw new InvalidDataException($"Terminate, root group with sReference '{rootGroupSreference}' does not exist in the Node table in the database");
                 }
                 if (parentSreference.Equals(CompanyGroupSReference, stringComparison)
-                    && !(rootGroupParsed is CompanyGroup))
+                    && rootGroupParsed is not CompanyGroup)
                 {
                     throw new InvalidDataException($"Terminate, first line parent with '{parentSreference}' is CompanyGroup while root group with sReference '{rootGroupSreference}' from command line is not");
                 }
@@ -324,7 +324,7 @@ namespace Geotab.SDK.ImportGroupsR
                     {
                         if (!nonUniqueElementsLookup.TryGetValue(key, out IList<TValue> nonUniqueElementsList))
                         {
-                            nonUniqueElementsList = new List<TValue>();
+                            nonUniqueElementsList = [];
                             nonUniqueElementsLookup.Add(key, nonUniqueElementsList);
                         }
                         nonUniqueElementsList.Add(item);
