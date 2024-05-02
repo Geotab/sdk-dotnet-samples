@@ -11,7 +11,7 @@ namespace ImportGroupsR.Test
     public class ApiTest
     {
         /// <summary>
-        /// This is a saftey precausion. These tests automatically remove all devices, rules, groups, users, zones, custom reports and trailer from the target database. Do not run against a production database. Register a new database @ https://my112.geotab.com/registration.html with the "_test" postfix to run the tests against.
+        /// This is a safety precaution. These tests automatically remove all devices, rules, groups, users, zones, custom reports and trailer from the target database. Do not run against a production database. Register a new database @ https://my112.geotab.com/registration.html with the "_test" postfix to run the tests against.
         /// </summary>
         const string ExpectedDatabasePostFix = "_tests";
         const string envUserName = "api_username";
@@ -85,7 +85,7 @@ namespace ImportGroupsR.Test
                 }
 
                 // don't delete our test runner user
-                var user = entity as User;
+                var user = entity;
                 if (user != null && user.Name.Equals(username, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;

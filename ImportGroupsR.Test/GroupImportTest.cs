@@ -14,7 +14,10 @@ using System.Threading.Tasks;
 
 namespace ImportGroupsR.Test
 {
-    public class GroupImportTest : ApiTest
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GroupImportTest" /> class.
+    /// </summary>
+    public class GroupImportTest(ITestOutputHelper log) : ApiTest(log)
     {
         static readonly string LocalTimeZoneId = Geotab.Checkmate.ObjectModel.TimeZoneInfo.MachineToOlson(System.TimeZoneInfo.Local.Id);
 
@@ -23,23 +26,14 @@ namespace ImportGroupsR.Test
         const string FirstLineParentName = "First Line Parent Name";
         const string FirstLineParentSreference = "First Line Parent Sreference";
 
-        bool isVerboseMode = true;
-        TestValueHelper testValueHelper;
+        readonly bool isVerboseMode = true;
+        readonly TestValueHelper testValueHelper = new TestValueHelper();
 
         Dictionary<string, Group> lookupSreferenceToGroupFromDbForVerification;
         Dictionary<Id, Group> lookupIdToGroupFromDbForVerification;
         IDictionary<string, IList<Group>> groupsInDBWithNonUniqueReferenceLookup; // Key -sReference
         IDictionary<Id, IList<Group>> groupsInDBWithNonUniqueIdLookup;
         int numberOfLinesParsed;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GroupImportTest" /> class.
-        /// </summary>
-        public GroupImportTest(ITestOutputHelper log)
-             : base(log)
-        {
-            testValueHelper = new TestValueHelper();
-        }
 
         /// <summary>
         /// Dummies the test.
@@ -135,7 +129,7 @@ namespace ImportGroupsR.Test
         {
             await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateZonesForDeletedAsync });
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, [importDeleted.CreateZonesForDeletedAsync]);
             await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
             await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
@@ -148,7 +142,7 @@ namespace ImportGroupsR.Test
         {
             await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateUsersForDeletedAsync });
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, [importDeleted.CreateUsersForDeletedAsync]);
             await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
             await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
@@ -161,7 +155,7 @@ namespace ImportGroupsR.Test
         {
             await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateDriversForDeletedAsync });
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, [importDeleted.CreateDriversForDeletedAsync]);
             await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
             await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
@@ -174,7 +168,7 @@ namespace ImportGroupsR.Test
         {
             await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateRulesForDeletedAsync });
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, [importDeleted.CreateRulesForDeletedAsync]);
             await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
             await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
@@ -187,7 +181,7 @@ namespace ImportGroupsR.Test
         {
             await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateCustomReportScheduleForDeleted_NormalReportAsync });
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, [importDeleted.CreateCustomReportScheduleForDeleted_NormalReportAsync]);
             await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
             await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
@@ -200,7 +194,7 @@ namespace ImportGroupsR.Test
         {
             await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateCustomReportScheduleForDeleted_DashboardAsync });
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, [importDeleted.CreateCustomReportScheduleForDeleted_DashboardAsync]);
             await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
             await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
@@ -213,7 +207,7 @@ namespace ImportGroupsR.Test
         {
             await SetupAsync();
             var importDeleted = new ImportDeleted(this);
-            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, new List<Func<API, Task>> { importDeleted.CreateCustomReportScheduleForDeleted_EmailPdfAsync });
+            await InitializeDatabaseAsync(api, CreateInputFileForDatabaseInitialization, [importDeleted.CreateCustomReportScheduleForDeleted_EmailPdfAsync]);
             await SimulateParsingAndImportFromFileAsync(api, importDeleted.CreateInputFileForDeleted, Parser_RowParsed, Importer_GroupImported, true);
             await importDeleted.Verify_WithOneAssociatedAssetClass_Deleted(api);
         }
@@ -375,17 +369,12 @@ namespace ImportGroupsR.Test
             }
         }
 
-        class ImportUpdated
+        class ImportUpdated(GroupImportTest testClass)
         {
-            readonly GroupImportTest testClass;
+            readonly GroupImportTest testClass = testClass;
             const string UpdatePostfixName = "UN";
             const string UpdatePostfixDescription = "UD";
             const int UpdateColorIncrement = 2;
-
-            public ImportUpdated(GroupImportTest testClass)
-            {
-                this.testClass = testClass;
-            }
 
             public int CreateInputFileForUpdated(TextWriter textWriter)
             {
@@ -458,17 +447,12 @@ namespace ImportGroupsR.Test
             }
         }
 
-        class ImportDeleted
+        class ImportDeleted(GroupImportTest testClass)
         {
-            readonly GroupImportTest testClass;
+            readonly GroupImportTest testClass = testClass;
             const string UpdatePostfixName = "UN";
             const string UpdatePostfixDescription = "UD";
             const int UpdateColorIncrement = 2;
-
-            public ImportDeleted(GroupImportTest testClass)
-            {
-                this.testClass = testClass;
-            }
 
             public int CreateInputFileForDeleted(TextWriter textWriter)
             {
@@ -668,20 +652,12 @@ namespace ImportGroupsR.Test
             }
         }
 
-        class ImportMovedUpdated
+        class ImportMovedUpdated(GroupImportTest testClass, string updatePostfixName = "UN", string updatePostfixDescription = "UD", int updateColorIncrement = 2)
         {
-            readonly GroupImportTest testClass;
-            readonly string updatePostfixName;
-            readonly string updatePostfixDescription;
-            readonly int updateColorIncrement;
-
-            public ImportMovedUpdated(GroupImportTest testClass, string updatePostfixName = "UN", string updatePostfixDescription = "UD", int updateColorIncrement = 2)
-            {
-                this.testClass = testClass;
-                this.updatePostfixName = updatePostfixName;
-                this.updatePostfixDescription = updatePostfixDescription;
-                this.updateColorIncrement = updateColorIncrement;
-            }
+            readonly GroupImportTest testClass = testClass;
+            readonly string updatePostfixName = updatePostfixName;
+            readonly string updatePostfixDescription = updatePostfixDescription;
+            readonly int updateColorIncrement = updateColorIncrement;
 
             public int CreateInputFileForMovedUpdated(TextWriter textWriter)
             {
@@ -878,7 +854,7 @@ namespace ImportGroupsR.Test
         async Task AddZoneToGroupAsync(API api, string groupSreference)
         {
             var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
-            var zone = testValueHelper.GetZone(new List<Group> { group });
+            var zone = TestValueHelper.GetZone([group]);
             zone.Id = await api.CallAsync<Id>("Add", typeof(Zone), new { entity = zone });
         }
 
@@ -901,7 +877,7 @@ namespace ImportGroupsR.Test
         async Task AddDriversToGroupAsync(API api, Group group)
         {
             var companyGroups = new List<Group> { group };
-            var driver = testValueHelper.GetDriver();
+            var driver = TestValueHelper.GetDriver();
             driver.CompanyGroups = driver.DriverGroups = companyGroups;
             driver.Id = await api.CallAsync<Id>("Add", typeof(User), new { entity = driver });
         }
@@ -912,7 +888,7 @@ namespace ImportGroupsR.Test
             for (int i = 0; i < ruleCount; i++)
             {
                 ruleNumber += i;
-                var rule = new Rule(null, null, $"Rule{ruleNumber}", new Color(255, 127, 80), "Comment", new List<Group> { group }, ExceptionRuleBaseType.Custom, DateTime.UtcNow, DateTime.MaxValue)
+                var rule = new Rule(null, null, $"Rule{ruleNumber}", new Color(255, 127, 80), "Comment", [group], ExceptionRuleBaseType.Custom, DateTime.UtcNow, DateTime.MaxValue)
                 {
                     Condition = new Condition { ConditionType = ConditionType.Aux1, Value = 1 }
                 };
@@ -944,6 +920,7 @@ namespace ImportGroupsR.Test
         async Task<int> AddCustomReportScheduleToGroupAsync(API api, string groupSreference, ReportDestination reportDestination, ReportToGroupAssociation groupToReportAssociation, int reportNumber, int reportCount = 1)
         {
             var group = GetGroupFrom_LookupSreferenceToGroupFromDbForVerification(groupSreference);
+            var testValueHelper = new TestValueHelper();
             for (int i = 0; i < reportCount; i++)
             {
                 reportNumber += i;
@@ -952,19 +929,19 @@ namespace ImportGroupsR.Test
                 switch (groupToReportAssociation)
                 {
                     case ReportToGroupAssociation.ScopeGroups:
-                        scopeGroups = new List<Group> { group };
+                        scopeGroups = [group];
                         break;
                     case ReportToGroupAssociation.IncludeAllChildrenGroups:
-                        includeAllChildrenGroups = new List<Group> { group };
+                        includeAllChildrenGroups = [group];
                         break;
                     case ReportToGroupAssociation.IncludeDirectChildrenOnlyGroups:
-                        includeDirectChildrenOnlyGroups = new List<Group> { group };
+                        includeDirectChildrenOnlyGroups = [group];
                         break;
                     default:
-                        Assert.True(false, $"Invalid GroupToReportAssociation: ${groupToReportAssociation} specified!");
+                        Assert.True(false, $"Invalid GroupToReportAssociation: {groupToReportAssociation} specified!");
                         break;
                 }
-                var report = testValueHelper.GetCustomReportSchedule($"Report{reportNumber}", reportDestination, scopeGroups, includeAllChildrenGroups, includeDirectChildrenOnlyGroups);
+                var report = testValueHelper.GetCustomReportSchedule($"Report{reportNumber}", reportDestination, scopeGroups, includeAllChildrenGroups, includeDirectChildrenOnlyGroups); // Call the instance method
                 report.Id = await api.CallAsync<Id>("Add", typeof(CustomReportSchedule), new { entity = report });
                 Assert.NotNull(report.Id);
             }
@@ -1039,7 +1016,7 @@ namespace ImportGroupsR.Test
         static async Task<(Dictionary<string, Group>, Dictionary<Id, Group>, IDictionary<string, IList<Group>>, IDictionary<Id, IList<Group>>)> GetAllGroupsFromDBAsync(API api)
         {
             IList<Group> groupListFromDB = await api.CallAsync<List<Group>>("Get", typeof(Group));
-            
+
             IDictionary<string, IList<Group>> groupsWithNonUniqueReferenceLookup;
             IDictionary<Id, IList<Group>> groupsWithNonUniqueIdLookup;
             Dictionary<string, Group> lookupSreferenceToGroup = RowParser<Group>.CreateDictionary(groupListFromDB, g => g.Reference, out groupsWithNonUniqueReferenceLookup);
@@ -1080,15 +1057,10 @@ namespace ImportGroupsR.Test
             return (int)colors.GetValue(index);
         }
 
-        abstract class RowParser<TItem>
+        abstract class RowParser<TItem>(API checkmateApi)
         {
-            protected readonly API checkmateApi;
+            protected readonly API checkmateApi = checkmateApi;
             protected int row;
-
-            protected RowParser(API checkmateApi)
-            {
-                this.checkmateApi = checkmateApi;
-            }
 
             public delegate TKey GetKey<TKey, TValue>(TValue entity);
 
@@ -1121,7 +1093,7 @@ namespace ImportGroupsR.Test
                         {
                             if (!nonUniqueElementsLookup.TryGetValue(key, out IList<TValue> nonUniqueElementsList))
                             {
-                                nonUniqueElementsList = new List<TValue>();
+                                nonUniqueElementsList = [];
                                 nonUniqueElementsLookup.Add(key, nonUniqueElementsList);
                             }
                             nonUniqueElementsList.Add(item);
@@ -1133,7 +1105,7 @@ namespace ImportGroupsR.Test
 
             public virtual List<TItem> Parse(Stream stream)
             {
-                List<TItem> items = new List<TItem>();
+                List<TItem> items = [];
                 row = 0;
                 using (StreamReader streamReader = new StreamReader(stream))
                 {

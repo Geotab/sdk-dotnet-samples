@@ -1,5 +1,4 @@
-﻿using Geotab.Checkmate;
-using Geotab.Checkmate.ObjectModel;
+﻿using Geotab.Checkmate.ObjectModel;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -7,21 +6,39 @@ using System.Text;
 
 namespace ImportGroupsR.Test
 {
-    class TestValueHelper
+    internal class TestValueHelper
     {
-        static Random random = new Random(0);
+        private static readonly Random random = new Random(0);
 
         public CustomReportSchedule GetCustomReportSchedule(string templateName, ReportDestination reportDestination, IList<Group> scopeGroups, IList<Group> includeAllChildrenGroups, IList<Group> includeDirectChildrenOnlyGroups)
         {
-            var argument = new
+            var argument = new ReportTypedArgument
             {
-                devices = new List<Device>(),
-                reportArgumentType = "DeviceActivityDetail"
+                ReportArgumentType = ReportArgumentType.DeviceActivityDetail 
             };
-            return new CustomReportSchedule(null, true, ReportFrequency.Daily, ReportPeriod.PreviousDay, GetReportTemplate(templateName), reportDestination, argument, GetRandomDateTime(true), GetUser(), Id.Create(Guid.NewGuid()), scopeGroups, null, includeAllChildrenGroups, includeDirectChildrenOnlyGroups);
+
+            return new CustomReportSchedule(
+                id: null,
+                name: null,
+                description: null,
+                isActive: true,
+                frequency: ReportFrequency.Daily,
+                period: ReportPeriod.PreviousDay,
+                template: GetReportTemplate(templateName),
+                destination: reportDestination,
+                arguments: argument,
+                lastRun: GetRandomDateTime(true),
+                lastModifiedUser: GetUser(),
+                scopeGroups: scopeGroups,
+                scopeGroupFilter: null,
+                includeAllChildrenGroups: includeAllChildrenGroups,
+                includeDirectChildrenOnlyGroups: includeDirectChildrenOnlyGroups,
+                lastUpdated: null,
+                interactiveSettings: null
+            );
         }
 
-        public ReportTemplate GetReportTemplate(string templateName)
+        public static ReportTemplate GetReportTemplate(string template)
         {
             byte[] binary = new byte[100];
             for (int i = 0; i < 100; i++)
@@ -29,10 +46,10 @@ namespace ImportGroupsR.Test
                 binary[i] = GetRandomByte();
             }
 
-            return new ReportTemplate(null, templateName, ReportDataSource.Device, binary, ReportTemplateType.Custom, true, null);
+            return new ReportTemplate(null, template, ReportDataSource.Device, binary, ReportTemplateType.Custom, true, null);
         }
 
-        public Driver GetDriver()
+        public static Driver GetDriver()
         {
             var userEmail = GetRandomString(15);
             var driver = new Driver
@@ -40,15 +57,15 @@ namespace ImportGroupsR.Test
                 Name = userEmail,
                 FirstName = GetRandomString(15),
                 LastName = GetRandomString(15),
-                CompanyGroups = new List<Group>() { new CompanyGroup() },
-                SecurityGroups = new List<Group>() { new EverythingSecurityGroup() },
+                CompanyGroups = [new CompanyGroup()],
+                SecurityGroups = [new EverythingSecurityGroup()],
                 Password = GetRandomString(15)
             };
             driver.DriverGroups = driver.CompanyGroups;
             return driver;
         }
 
-        public User GetUser()
+        public static User GetUser()
         {
             var userEmail = GetRandomString(15);
             var user = new User
@@ -56,15 +73,15 @@ namespace ImportGroupsR.Test
                 Name = userEmail,
                 FirstName = GetRandomString(15),
                 LastName = GetRandomString(15),
-                CompanyGroups = new List<Group>() { new CompanyGroup() },
-                SecurityGroups = new List<Group>() { new EverythingSecurityGroup() },
+                CompanyGroups = [new CompanyGroup()],
+                SecurityGroups = [new EverythingSecurityGroup()],
                 Password = GetRandomString(15)
             };
             user.PopulateDefaults();
             return user;
         }
 
-        public string GetRandomString(int length)
+        public static string GetRandomString(int length)
         {
             StringBuilder sb = new StringBuilder(length);
             for (int i = 0; i < length; i++)
@@ -74,7 +91,7 @@ namespace ImportGroupsR.Test
             return sb.ToString();
         }
 
-        public double GetRandomDouble()
+        public static double GetRandomDouble()
         {
             lock (random)
             {
@@ -82,7 +99,7 @@ namespace ImportGroupsR.Test
             }
         }
 
-        public T GetRandomEnum<T>(List<T> list = null)
+        public static T GetRandomEnum<T>(List<T> list = null)
         {
             if (typeof(T).GetTypeInfo().BaseType != typeof(Enum))
             {
@@ -96,7 +113,7 @@ namespace ImportGroupsR.Test
             return list[GetRandomInt(list.Count - 1)];
         }
 
-        public int GetRandomInt(int maximumValue)
+        public static int GetRandomInt(int maximumValue)
         {
             lock (random)
             {
@@ -104,7 +121,7 @@ namespace ImportGroupsR.Test
             }
         }
 
-        public int GetRandomInt(int minValue, int maximumValue)
+        public static int GetRandomInt(int minValue, int maximumValue)
         {
             lock (random)
             {
@@ -112,18 +129,18 @@ namespace ImportGroupsR.Test
             }
         }
 
-        public byte GetRandomByte()
+        public static byte GetRandomByte()
         {
             return (byte)GetRandomInt(0, 256);
         }
 
-        public DateTime GetRandomDateTime(bool maxDateTimeNow = true)
+        public static DateTime GetRandomDateTime(bool maxDateTimeNow = true)
         {
             DateTime max = maxDateTimeNow ? DateTime.UtcNow : new DateTime(2050, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return GetRandomDateTime(SupportedDateTime.MinDateTime, max);
         }
 
-        public DateTime GetRandomDateTime(DateTime minDateTime, DateTime maxDateTime)
+        public static DateTime GetRandomDateTime(DateTime minDateTime, DateTime maxDateTime)
         {
             // Spread random instants with even probability between min and max date boundaries.
             if (maxDateTime == DateTime.MaxValue)
@@ -146,7 +163,7 @@ namespace ImportGroupsR.Test
             return minDateTime.AddMilliseconds(GetRandomInt(0, maxIntMillis) * (long)GetRandomInt(0, maxIntMillis));
         }
 
-        public Zone GetZone(List<Group> groups)
+        public static Zone GetZone(List<Group> groups)
         {
             var ep = new List<ISimpleCoordinate>();
             for (int i = 0; i < 4; i++)
@@ -167,5 +184,10 @@ namespace ImportGroupsR.Test
 
             return zone;
         }
+    }
+
+    internal class SupportedDateTime
+    {
+        public static DateTime MinDateTime { get; internal set; }
     }
 }
