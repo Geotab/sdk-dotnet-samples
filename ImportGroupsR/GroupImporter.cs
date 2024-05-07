@@ -44,7 +44,7 @@ namespace Geotab.SDK.ImportGroupsR
         /// </summary>
         /// <param name="api">The API.</param>
         /// <param name="firstLineParentGroupParsed">Parsed group tree root starting with first line parent.</param>
-        /// <param name="firstLineParentGroupFromDB">Group tree retrived from DB. Root sReference matches that of first line parent parsed</param>
+        /// <param name="firstLineParentGroupFromDB">Group tree retrieved from DB. Root sReference matches that of first line parent parsed</param>
         /// <param name="parsedGroupCount">The parsed group count.</param>
         /// <param name="groupLookupParsed">The group lookup parsed.</param>
         /// <param name="groupLookupFromDB">The group lookup from database.</param>
@@ -155,7 +155,7 @@ namespace Geotab.SDK.ImportGroupsR
 
         static Driver GetDriver(User user)
         {
-            if (!(user is Driver driver))
+            if (user is not Driver driver)
             {
                 if (user is NoUser)
                 {
@@ -228,7 +228,7 @@ namespace Geotab.SDK.ImportGroupsR
                     includeGroups = $"{EmailReportInclude}";
                     break;
             }
-            if (IsGroupInList(report.ScopeGroups, group))
+            if (IsGroupInList((IList<Group>)report.ScopeGroupFilter, group))
             {
                 scope = true;
             }
@@ -340,7 +340,7 @@ namespace Geotab.SDK.ImportGroupsR
                 }
                 catch (Exception exception)
                 {
-                    if (!(exception is GroupRelationViolatedException groupRelationViolatedException))
+                    if (exception is not GroupRelationViolatedException groupRelationViolatedException)
                     {
                         var groupParsedWithOldParentData = GetGroupWithParentData(group, false);
                         OnEntityImported(new EntityImportedEventArgs<GroupWithLoggingData>(groupParsedWithOldParentData, EntityImportStatus.Failed, exception));
@@ -478,7 +478,7 @@ namespace Geotab.SDK.ImportGroupsR
         /// </summary>
         /// <param name="group">group</param>
         /// <param name="fillOldParentData">true if existed in DB prior to import</param>
-        /// <param name = "relations"><see cref="GroupRelations"/> for the group</param>
+        /// <param name="relations"><see cref="GroupRelations"/> for the group</param>
         GroupWithLoggingData GetGroupWithParentData(Group group, bool fillOldParentData, GroupRelations relations = null)
         {
             if (!fillOldParentData)

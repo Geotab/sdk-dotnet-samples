@@ -23,7 +23,7 @@
         Existing,
 
         /// <summary>
-        /// The Entity was endated
+        /// The Entity was end dated
         /// </summary>
         EndDated,
 

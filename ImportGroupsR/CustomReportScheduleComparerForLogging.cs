@@ -6,9 +6,8 @@ namespace Geotab.SDK.ImportGroupsR
 {
     public class CustomReportScheduleComparerForLogging : Comparer<CustomReportSchedule>
     {
-        readonly ReportDestinationComparer reportDestinationComparer = new ReportDestinationComparer();
-
-        readonly IComparer<string> stringComparer = StringComparer.CurrentCulture;
+        private readonly ReportDestinationComparer reportDestinationComparer = new();
+        private readonly IComparer<string> stringComparer = StringComparer.CurrentCulture;
 
         public override int Compare(CustomReportSchedule x, CustomReportSchedule y)
         {
@@ -44,7 +43,7 @@ namespace Geotab.SDK.ImportGroupsR
             return 0;
         }
 
-        class ReportDestinationComparer : Comparer<ReportDestination>
+        private class ReportDestinationComparer : Comparer<ReportDestination>
         {
             public override int Compare(ReportDestination x, ReportDestination y)
             {

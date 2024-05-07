@@ -2,28 +2,30 @@
 
 ## Reference-based Group Importing
 
-- [Introduction](#introduction)
-  * [Parsing and Import](#parsing-and-import)
-- [ImportGroupR Command Line](#importgroupr-command-line)
-  * [Command Line Arguments](#command-line-arguments)
-- [importGroups.csv File](#importgroupscsv-file)
-  * [Example importGroups.csv Files](#example-importgroupscsv-files)
-  * [importGroups.csv — Description of Fields](#importgroupscsv---description-of-fields)
-- [ImportGroupR Details](#importgroupr-details)
-  * [Top-down Parsing and Importing](#top-down-parsing-and-importing)
-  * [Unique Naming](#unique-naming)
-  * [Reference Name Substitution](#reference-name-substitution)
-  * [Uniqueness Verification](#uniqueness-verification)
-  * [Color Values](#color-values)
-- [ImportGroupR Process](#importgroupr-process)
-  * [Import](#import)
-  * [Update](#update)
-  * [Move](#move)
-  * [Delete](#delete)
-    + [-d Is Not Provided](#-d-is-not-provided)
-    + [-d Is Provided](#-d-is-provided)
-      - [and -m is not provided](#and--m-is-not-provided)
-      - [and -m is provided](#and--m-is-provided)
+- [Import Groups by Reference](#import-groups-by-reference)
+  - [Reference-based Group Importing](#reference-based-group-importing)
+  - [Introduction](#introduction)
+    - [Parsing and Import](#parsing-and-import)
+  - [ImportGroupR Command Line](#importgroupr-command-line)
+    - [Command Line Arguments](#command-line-arguments)
+  - [importGroups.csv File](#importgroupscsv-file)
+    - [Example importGroups.csv Files](#example-importgroupscsv-files)
+    - [importGroups.csv — Description of Fields](#importgroupscsv--description-of-fields)
+  - [ImportGroupR Details](#importgroupr-details)
+    - [Top-down Parsing and Importing](#top-down-parsing-and-importing)
+    - [Unique Naming](#unique-naming)
+    - [Reference Name Substitution](#reference-name-substitution)
+    - [Uniqueness Verification](#uniqueness-verification)
+    - [Color Values](#color-values)
+  - [ImportGroupR Process](#importgroupr-process)
+    - [Import](#import)
+    - [Update](#update)
+    - [Move](#move)
+    - [Delete](#delete)
+      - [-d Is Not Provided](#-d-is-not-provided)
+      - [-d Is Provided](#-d-is-provided)
+        - [and -m is not provided](#and--m-is-not-provided)
+        - [and -m is provided](#and--m-is-provided)
 
 ## Introduction
 
@@ -42,7 +44,7 @@ The operation of the ImportGroupR tool can be logically separated into two stage
 
 The ImportGroupR tool is a console application with the following command line:
 
-`dotnet run <MyGeotab Server Name> <Database Name> <Input File Path> <User Name> <Password> -f <Log File Path> -v -r <Root Group Reference> -d -m`
+`dotnet run <MyGeotab Server Name> <Database Name> <Input File Path> <User Name> <Password> --f <Log File Path> --v --r <Root Group Reference> --d --m`
 
 For comparison, the command line of the similar SDK ImportGroup is:
 
@@ -62,7 +64,7 @@ For the remainder of this document, the file name at the end of the `<Input File
 | `-d` — Optional argument. If provided, the groups that are in the MyGeotab database under the ImportGroupR **Root Group** , but not in the **importGroups.csv** file, shall be deleted if they contain no assets (i.e., child groups, devices, zones, users, etc.).If the parameter is omitted, such groups shall be logged in the log file as existing in the database but missing from the **importGroups.csv** file. |
 | `-m` — Optional argument.Implementation forthcoming.If provided concurrently with the **-d** argument, the tool will follow more severe rules for deletion. The rules are as follows:The groups found in the MyGeotab database but not in the **importGroups.csv** file will be deleted if empty. If not empty, the group's assets shall be moved to its parent and then the group will be deleted. |
 
-Example of command line: `dotnet run my.geotab.com geotabdemo importGroups.csv youruser@yourdomain.com yourpassword -f importGroups.log -v -r "New Region Structure"`
+Example of command line: `dotnet run my.geotab.com geotabdemo importGroups.csv youruser@yourdomain.com yourpassword --f importGroups.log --v --r "New Region Structure"`
 
 ## importGroups.csv File
 

@@ -15,7 +15,6 @@ using Geotab.Checkmate.ObjectModel;
  * limits or any other constraints relevant to your use case.  *
  ***************************************************************/
 
-
 namespace Geotab.SDK.ImportGroupsR
 {
     static class Program
@@ -188,7 +187,7 @@ Server                  - The server name or IP address of the SQL Server contai
 Database                - The Checkmate database name (for example GEOTAB1)
 InputFilePath           - Full path to the CSV file to import
 Username                - Geotab user name (Example: username@geotab.com)
-Pasword                 - Geotab password
+Password                - Geotab password
 --f OutputFilePath      - File name of the output file
 --v                     - Output in verbose mode
 --r RootGroupSreference - Route Group sReference
