@@ -350,7 +350,7 @@ namespace Geotab.SDK.DataFeed
         }
 
         async Task<FeedResult<T>> MakeFeedCallAsync<T>(long? fromVersion)
-            where T : Entity => await api.CallAsync<FeedResult<T>>("GetFeed", typeof(T), new { fromVersion });
+            where T : Entity => await api.CallAsync<FeedResult<T>>("GetFeed", typeof(T), new { fromVersion = fromVersion });
 
         async Task PopulateCachesAsync()
         {
