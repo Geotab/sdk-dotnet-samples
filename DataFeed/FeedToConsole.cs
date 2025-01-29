@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Geotab.Checkmate.ObjectModel;
 using Geotab.Checkmate.ObjectModel.Engine;
+using Geotab.Checkmate.ObjectModel.Exceptions;
 
 namespace Geotab.SDK.DataFeed
 {
@@ -14,11 +15,17 @@ namespace Geotab.SDK.DataFeed
         const string FaultDataHeader = "Vehicle Serial Number, Date, Diagnostic Name, Failure Mode Name, Failure Mode Source, Controller Name";
         const string GpsDataHeader = "Vehicle Serial Number, Date, Longitude, Latitude, Speed";
         const string StatusDataHeader = "Vehicle Serial Number, Date, Diagnostic Name, Source Name, Value, Units";
+        const string TripHeader = "VehicleName, VehicleSerialNumber, Vin, Driver Name, Driver Keys, Trip Start Time, Trip End Time, Trip Distance";
+
+        const string ExceptionEventHeader = "Id, Vehicle Name, Vehicle Serial Number, VIN, Diagnostic Name, Diagnostic Code, Source Name, Driver Name, Driver Keys, Rule Name,sActive From, Active To";
+
         static readonly char[] trimChars = { ' ', ',' };
         readonly IDictionary<Id, Device> deviceLookup = new Dictionary<Id, Device>();
         readonly IList<FaultData> faultRecords;
         readonly IList<LogRecord> gpsRecords;
         readonly IList<StatusData> statusRecords;
+        readonly IList<ExceptionEvent> exceptionEvents;
+        readonly IList<Trip> trips;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FeedToConsole"/> class.
@@ -26,11 +33,13 @@ namespace Geotab.SDK.DataFeed
         /// <param name="gpsRecords">The GPS records.</param>
         /// <param name="statusRecords">The status records.</param>
         /// <param name="faultRecords">The fault records.</param>
-        public FeedToConsole(IList<LogRecord> gpsRecords = null, IList<StatusData> statusRecords = null, IList<FaultData> faultRecords = null)
+        public FeedToConsole(IList<LogRecord> gpsRecords = null, IList<StatusData> statusRecords = null, IList<FaultData> faultRecords = null, IList<Trip> trips = null, IList<ExceptionEvent> exceptionEvents = null)
         {
             this.gpsRecords = gpsRecords ?? new List<LogRecord>();
             this.statusRecords = statusRecords ?? new List<StatusData>();
             this.faultRecords = faultRecords ?? new List<FaultData>();
+            this.trips = trips ?? new List<Trip>();
+            this.exceptionEvents = exceptionEvents ?? new List<ExceptionEvent>();
             List<Device> devices = new List<Device>(SeparateByDevice(this.gpsRecords).Keys);
             devices.AddRange(SeparateByDevice(this.statusRecords).Keys);
             devices.AddRange(SeparateByDevice(this.faultRecords).Keys);
@@ -111,9 +120,17 @@ namespace Geotab.SDK.DataFeed
             {
                 WriteData(faultRecords);
             }
-            if ((faultRecords.Count == 0)&& (statusRecords.Count == 0) && (gpsRecords.Count == 0))
+            if (trips.Count > 0)
             {
-                WriteError();
+                WriteData(trips);
+            }
+            if (exceptionEvents.Count > 0)
+            {
+                WriteData(exceptionEvents);
+            }
+            if ((faultRecords.Count == 0)&& (statusRecords.Count == 0) && (gpsRecords.Count == 0) && (trips.Count == 0) && (exceptionEvents.Count == 0))
+            {
+                NoDataError();
             }
         }
 
@@ -156,6 +173,47 @@ namespace Geotab.SDK.DataFeed
             else
             {
                 AppendValues(sb, "");
+                AppendValues(sb, "");
+            }
+        }
+
+        static void AppendDeviceValues(StringBuilder sb, Device device)
+        {
+            AppendValues(sb, device.Name.Replace(",", " "));
+            AppendValues(sb, device.SerialNumber);
+            GoDevice goDevice = device as GoDevice;
+            AppendValues(sb, (goDevice == null ? "" : goDevice.VehicleIdentificationNumber ?? "").Replace(",", " "));
+        }
+        
+        static void AppendDriverValues(StringBuilder sb, Driver driver)
+        {
+            AppendName(sb, driver);
+            List<Key> keys = driver.Keys;
+            if (keys != null)
+            {
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        sb.Append('~');
+                    }
+                    sb.Append(keys[i].SerialNumber);
+                }
+            }
+            sb.Append(',');
+        }
+
+        static void AppendDiagnosticValues(StringBuilder sb, Diagnostic diagnostic)
+        {
+            AppendName(sb, diagnostic);
+            AppendValues(sb, diagnostic.Code);
+            Source source = diagnostic.Source;
+            if (source != null)
+            {
+                AppendName(sb, source);
+            }
+            else
+            {
                 AppendValues(sb, "");
             }
         }
@@ -207,8 +265,34 @@ namespace Geotab.SDK.DataFeed
             Console.WriteLine(sb.ToString().TrimEnd(trimChars));
         }
 
-        void WriteError(){
-            Console.WriteLine("No data found");
+        void Write(Trip trip)
+        {
+            StringBuilder sb = new StringBuilder();
+            AppendDeviceValues(sb, trip.Device);
+            AppendDriverValues(sb, trip.Driver);
+            AppendValues(sb, trip.Start);
+            AppendValues(sb, trip.Stop);
+            AppendValues(sb, trip.Distance);
+            Console.WriteLine(sb.ToString().TrimEnd(trimChars));
+        }
+
+
+        void Write(ExceptionEvent exceptionEvent)
+        {
+            StringBuilder sb = new StringBuilder();
+            AppendValues(sb, exceptionEvent.Id);
+            AppendDeviceValues(sb, exceptionEvent.Device);
+            AppendDiagnosticValues(sb, exceptionEvent.Diagnostic);
+            AppendDriverValues(sb, exceptionEvent.Driver);
+            AppendName(sb, exceptionEvent.Rule);
+            AppendValues(sb, exceptionEvent.ActiveFrom);
+            AppendValues(sb, exceptionEvent.ActiveTo);
+            Console.WriteLine(sb.ToString().TrimEnd(trimChars));
+        }
+
+
+        void NoDataError(){
+            Console.WriteLine("Unable to Write to Console: No data found");
         }
         void WriteData<T>(IList<T> entities)
                                             where T : class
@@ -244,6 +328,27 @@ namespace Geotab.SDK.DataFeed
                 }
                 Console.WriteLine();
             }
+            else if (type == typeof(Trip))
+            {
+                IList<Trip> trips = (IList<Trip>)entities;
+                Console.WriteLine(TripHeader);
+                for (int i = 0; i < trips.Count; i++)
+                {
+                    Write(trips[i]);
+                }
+                Console.WriteLine();
+            }
+            else if (type == typeof(ExceptionEvent))
+            {
+                IList<ExceptionEvent> exceptionEvents = (IList<ExceptionEvent>)entities;
+                Console.WriteLine(ExceptionEventHeader);
+                for (int i = 0; i < exceptionEvents.Count; i++)
+                {
+                    Write(exceptionEvents[i]);
+                }
+                Console.WriteLine();
+            }
+
             else
             {
                 throw new NotSupportedException(type.ToString());

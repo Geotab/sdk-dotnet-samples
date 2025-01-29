@@ -33,7 +33,7 @@ namespace Geotab.SDK.DataFeed
             // Optionally we can output to csv or google doc:
             new FeedToCsv(path, results.GpsRecords, results.StatusData, results.FaultData, results.Trips, results.ExceptionEvents).Run();
             // Displays feed to console
-            new FeedToConsole(results.GpsRecords,results.StatusData,results.FaultData).Run();
+            new FeedToConsole(results.GpsRecords,results.StatusData,results.FaultData, results.Trips, results.ExceptionEvents).Run();
                         
             await Task.Delay(1000);
         }
