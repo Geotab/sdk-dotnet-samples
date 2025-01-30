@@ -17,7 +17,7 @@ namespace Geotab.SDK.DataFeed
         const string StatusDataHeader = "Vehicle Serial Number, Date, Diagnostic Name, Source Name, Value, Units";
         const string TripHeader = "VehicleName, VehicleSerialNumber, Vin, Driver Name, Driver Keys, Trip Start Time, Trip End Time, Trip Distance";
 
-        const string ExceptionEventHeader = "Id, Vehicle Name, Vehicle Serial Number, VIN, Diagnostic Name, Diagnostic Code, Source Name, Driver Name, Driver Keys, Rule Name,sActive From, Active To";
+        const string ExceptionEventHeader = "Id, Vehicle Name, Vehicle Serial Number, VIN, Diagnostic Name, Diagnostic Code, Source Name, Driver Name, Driver Keys, Rule Name, Active From, Active To";
 
         static readonly char[] trimChars = { ' ', ',' };
         readonly IDictionary<Id, Device> deviceLookup = new Dictionary<Id, Device>();
@@ -223,8 +223,8 @@ namespace Geotab.SDK.DataFeed
             StringBuilder sb = new StringBuilder();
             AppendDeviceValues(sb, logRecord.Device.Id);
             AppendValues(sb, logRecord.DateTime);
-            AppendValues(sb, Math.Round(logRecord.Longitude, 3));
-            AppendValues(sb, Math.Round(logRecord.Latitude, 3));
+            AppendValues(sb, Math.Round((decimal)(logRecord.Longitude?? 0.0), 3)); 
+            AppendValues(sb, Math.Round((decimal)(logRecord.Latitude?? 0.0), 3)); 
             AppendValues(sb, logRecord.Speed);
             Console.WriteLine(sb.ToString().TrimEnd(trimChars));
         }
