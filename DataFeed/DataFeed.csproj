@@ -11,6 +11,6 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="11.7.179" />
+    <PackageReference Include="Geotab.Checkmate.ObjectModel" Version="11.43.302" />
   </ItemGroup>
 </Project>

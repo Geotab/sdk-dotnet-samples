@@ -125,6 +125,10 @@ namespace Geotab.SDK.DataFeed
             {
                 WriteDataToCsv<ExceptionEvent>();
             }
+            if ((faultRecords.Count == 0)&& (statusRecords.Count == 0) && (gpsRecords.Count == 0) && (trips.Count == 0) && (exceptionEvents.Count == 0))
+            {
+                NoDataError();
+            }
         }
 
         static void AppendDeviceValues(StringBuilder sb, Device device)
@@ -186,6 +190,10 @@ namespace Geotab.SDK.DataFeed
             StringBuilder sb = new StringBuilder();
             action(sb, entity);
             writer.WriteLine(sb.ToString().TrimEnd(','));
+        }
+
+        void NoDataError(){
+            Console.WriteLine("Unable to Generate CSV: No data found");
         }
 
         void WriteDataToCsv<T>()
