@@ -4,7 +4,7 @@ The following examples show common usages of the SDK using dotnet. We recommend 
 
 ## How to run the examples?
 
-In order to run these examples, you first need to [install .NET Core](http://dotnet.github.io/getting-started/). After that, you can clone this repo, go into each of the examples folders and either:
+In order to run these examples, you first need to [install the .NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). After that, you can clone this repo, go into each of the examples folders and either:
 
 * Run from source using the following commands:
   * `dotnet restore`

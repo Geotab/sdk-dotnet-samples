@@ -46,7 +46,14 @@ namespace ImportGroupsR.Test
                 binary[i] = GetRandomByte();
             }
 
-            return new ReportTemplate(null, template, ReportDataSource.Device, binary, ReportTemplateType.Custom, true, null);
+            return new ReportTemplate
+            {
+                Name = template,
+                ReportDataSource = ReportDataSource.Device,
+                BinaryData = binary,
+                ReportTemplateType = ReportTemplateType.Custom,
+                ShowReport = true
+            };
         }
 
         public static Driver GetDriver()

@@ -14,7 +14,7 @@ Steps:
 
 The sample application requires:
 
-- [.Net core 2.0 SDK](https://dot.net/core) or higher
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or higher
 
 ## CSV layout
 
