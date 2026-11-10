@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - run: dotnet restore SdkExamples.sln
+
+      - run: dotnet build SdkExamples.sln --no-restore --configuration Release
+
+      # ImportGroupsR.Test is a live-API integration suite that needs api_server / api_database /
+      # api_username / api_password pointing at a test database, so it is not run here.
+
+      - name: Check for vulnerable packages
+        run: |
+          dotnet list SdkExamples.sln package --vulnerable --include-transitive | tee vulnerable.txt
+          ! grep -q "has the following vulnerable packages" vulnerable.txt

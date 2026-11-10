@@ -14,7 +14,7 @@ This console application demonstrates importing users from a .csv file.
 
 ## Prerequisites
 
-[.NET Core 2.0 SDK](https://dot.net/core) or higher
+[.NET SDK 10.0.114](https://dotnet.microsoft.com/download/dotnet/10.0) or later (runtime 10.0.14+, see CVE-2026-111497)
 
 ## CSV Layout
 

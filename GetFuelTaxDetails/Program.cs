@@ -217,13 +217,13 @@ namespace Geotab.SDK.GetFuelTaxDetails
                     for (var detailIndex = 1; detailIndex < detailCount; detailIndex++)
                     {
                         var nextDetail = group[detailIndex];
-                        if (nextDetail.EnterTime.Ticks % TimeSpan.TicksPerHour == 0)
+                        if (nextDetail.EnterTime.HasValue && nextDetail.EnterTime.Value.Ticks % TimeSpan.TicksPerHour == 0)
                         {
-                            detail.HourlyOdometer.Add(nextDetail.EnterOdometer);
-                            detail.HourlyGpsOdometer.Add(nextDetail.EnterGpsOdometer);
-                            detail.HourlyLatitude.Add(nextDetail.EnterLatitude);
-                            detail.HourlyLongitude.Add(nextDetail.EnterLongitude);
-                            detail.HourlyIsOdometerInterpolated.Add(nextDetail.IsEnterOdometerInterpolated);
+                            detail.HourlyOdometer.Add(nextDetail.EnterOdometer.GetValueOrDefault());
+                            detail.HourlyGpsOdometer.Add(nextDetail.EnterGpsOdometer.GetValueOrDefault());
+                            detail.HourlyLatitude.Add(nextDetail.EnterLatitude.GetValueOrDefault());
+                            detail.HourlyLongitude.Add(nextDetail.EnterLongitude.GetValueOrDefault());
+                            detail.HourlyIsOdometerInterpolated.Add(nextDetail.IsEnterOdometerInterpolated.GetValueOrDefault());
                         }
                         for (int hourIndex = 0; hourIndex < nextDetail.HourlyOdometer.Count; hourIndex++)
                         {
@@ -251,9 +251,14 @@ namespace Geotab.SDK.GetFuelTaxDetails
         {
             var fuelUsageByJurisdiction = new Dictionary<string, Dictionary<FuelType, FuelUsage>>();
 
-            // Get the details' time interval.
-            DateTime fromDate = details[0].EnterTime;
-            DateTime toDate = details[details.Count - 1].ExitTime;
+            // Get the details' time interval. EnterTime/ExitTime are nullable in the SDK; without both boundaries there is no interval to search.
+            DateTime? fromDate = details[0].EnterTime;
+            DateTime? toDate = details[details.Count - 1].ExitTime;
+            if (fromDate == null || toDate == null)
+            {
+                Console.WriteLine($"Device {device.Name}: fuel tax details are missing an enter or exit time; skipping fuel usage calculation.");
+                return fuelUsageByJurisdiction;
+            }
 
             // Get the fuel transactions within the details' time interval.
             Search fuelTransactionSearch = new FuelTransactionSearch
@@ -343,7 +348,7 @@ namespace Geotab.SDK.GetFuelTaxDetails
                         fuelUsageByType = new Dictionary<FuelType, FuelUsage>();
                         fuelUsageByJurisdiction.Add(jurisdiction, fuelUsageByType);
                     }
-                    double detailDistance = detail.ExitOdometer - detail.EnterOdometer;
+                    double detailDistance = detail.ExitOdometer.GetValueOrDefault() - detail.EnterOdometer.GetValueOrDefault();
                     foreach (var fuelType in fuelPurchasedByType.Keys)
                     {
                         if (!fuelUsageByType.TryGetValue(fuelType, out FuelUsage fuelUsage))

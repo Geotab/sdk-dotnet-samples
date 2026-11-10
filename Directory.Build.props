@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Minimum runtime patch. CVE-2026-111497 (Brotli decoder) is fixed in 10.0.14; framework-dependent apps still roll forward to newer patches. -->
+    <RuntimeFrameworkVersion>10.0.14</RuntimeFrameworkVersion>
+  </PropertyGroup>
+</Project>

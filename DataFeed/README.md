@@ -8,7 +8,7 @@ The Data Feed is an example application that allows a third party to easily rece
 
 The sample application requires:
 
-- [.Net core 2.0 SDK](https://dot.net/core) or higher
+- [.NET SDK 10.0.114](https://dotnet.microsoft.com/download/dotnet/10.0) or later (runtime 10.0.14+, see CVE-2026-111497)
 
 The Geotab Data Feed application connects to the MyGeotab cloud hosting services, please ensure that devices have been registered and added to the database. The following information is required:
 
