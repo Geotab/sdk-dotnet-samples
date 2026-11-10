@@ -1,9 +1,0 @@
-language: csharp
-solution: SdkExamples.sln
-dotnet: 6.0.200
-mono: none
-install:
-- dotnet restore
-script:
-- dotnet build
-- dotnet test ./ImportGroupsR.Test/ImportGroupsR.Test.csproj

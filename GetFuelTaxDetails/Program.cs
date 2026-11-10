@@ -251,9 +251,14 @@ namespace Geotab.SDK.GetFuelTaxDetails
         {
             var fuelUsageByJurisdiction = new Dictionary<string, Dictionary<FuelType, FuelUsage>>();
 
-            // Get the details' time interval.
-            DateTime fromDate = details[0].EnterTime.Value;
-            DateTime toDate = details[details.Count - 1].ExitTime.Value;
+            // Get the details' time interval. EnterTime/ExitTime are nullable in the SDK; without both boundaries there is no interval to search.
+            DateTime? fromDate = details[0].EnterTime;
+            DateTime? toDate = details[details.Count - 1].ExitTime;
+            if (fromDate == null || toDate == null)
+            {
+                Console.WriteLine($"Device {device.Name}: fuel tax details are missing an enter or exit time; skipping fuel usage calculation.");
+                return fuelUsageByJurisdiction;
+            }
 
             // Get the fuel transactions within the details' time interval.
             Search fuelTransactionSearch = new FuelTransactionSearch

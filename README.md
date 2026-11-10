@@ -1,10 +1,10 @@
-# Dotnet Examples [![Build Status](https://travis-ci.org/Geotab/sdk-dotnet-samples.svg?branch=master)](https://travis-ci.org/Geotab/sdk-dotnet-samples)
+# Dotnet Examples [![Build](https://github.com/Geotab/sdk-dotnet-samples/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Geotab/sdk-dotnet-samples/actions/workflows/build.yml)
 
 The following examples show common usages of the SDK using dotnet. We recommend that you study the examples to learn everything necessary to build your own custom applications:
 
 ## How to run the examples?
 
-In order to run these examples, you first need to [install the .NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). After that, you can clone this repo, go into each of the examples folders and either:
+In order to run these examples, you first need to [install the .NET SDK](https://dotnet.microsoft.com/download/dotnet/10.0), version 10.0.114 or later (runtime 10.0.14+, which includes the fix for CVE-2026-111497). The `global.json` in this repo enforces this minimum. After that, you can clone this repo, go into each of the examples folders and either:
 
 * Run from source using the following commands:
   * `dotnet restore`
